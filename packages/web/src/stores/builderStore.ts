@@ -175,7 +175,16 @@ interface BuilderState {
   loadPage: (siteId: string, pageId: string) => Promise<void>;
   savePage: () => Promise<void>;
   createPage: (name: string) => Promise<string | null>;
-  deletePage: (pageId: string) => Promise<boolean>;
+  deletePage: (
+    pageId: string,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>;
+  updatePageDetails: (input: {
+    name: string;
+    slug: string;
+    metaTitle: string;
+    metaDescription: string;
+    isHomepage: boolean;
+  }) => Promise<{ ok: true } | { ok: false; error: string }>;
 
   addElement: (type: ElementType, index?: number, parentId?: string) => void;
   addGridChild: (gridId: string, cellIndex: number, type: ElementType) => void;
@@ -278,32 +287,80 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
       return newPage.id;
     } catch (error) {
-      console.error('Failed to create page:', error);
+      console.error("Failed to create page:", error);
       return null;
     }
   },
 
   deletePage: async (pageId: string) => {
     const { site, currentPage } = get();
-    if (!site) return false;
+    if (!site) {
+      return { ok: false as const, error: "No site loaded" };
+    }
 
     try {
       await api.delete(`/sites/${site.id}/pages/${pageId}`);
 
-      // Update site pages list
       set({
         site: {
           ...site,
           pages: site.pages?.filter((p) => p.id !== pageId) || [],
         },
-        // Clear current page if it was deleted
         currentPage: currentPage?.id === pageId ? null : currentPage,
       });
 
-      return true;
+      return { ok: true as const };
     } catch (error) {
-      console.error('Failed to delete page:', error);
-      return false;
+      const message =
+        error instanceof Error ? error.message : "Failed to delete page";
+      console.error("Failed to delete page:", error);
+      return { ok: false as const, error: message };
+    }
+  },
+
+  updatePageDetails: async (input) => {
+    const { site, currentPage } = get();
+    if (!site || !currentPage) {
+      return { ok: false as const, error: "No page loaded" };
+    }
+
+    try {
+      const response = await api.put(
+        `/sites/${site.id}/pages/${currentPage.id}`,
+        {
+          name: input.name.trim(),
+          slug: input.slug.trim(),
+          metaTitle: input.metaTitle,
+          metaDescription: input.metaDescription,
+          isHomepage: input.isHomepage,
+        },
+      );
+      const updated = response.data.data;
+
+      await get().loadSite(site.id);
+
+      const prev = get().currentPage;
+      set({
+        currentPage:
+          prev && prev.id === updated.id
+            ? {
+                ...prev,
+                name: updated.name,
+                slug: updated.slug,
+                metaTitle: updated.metaTitle ?? null,
+                metaDescription: updated.metaDescription ?? null,
+                isHomepage: updated.isHomepage,
+                updatedAt: updated.updatedAt,
+              }
+            : prev,
+      });
+
+      return { ok: true as const };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update page";
+      console.error("Failed to update page details:", error);
+      return { ok: false as const, error: message };
     }
   },
 
