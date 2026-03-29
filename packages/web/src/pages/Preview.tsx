@@ -101,7 +101,12 @@ export default function Preview() {
       {/* Page content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {page.elements.map((element) => (
-          <ElementRenderer key={element.id} element={element} />
+          <ElementRenderer
+            key={element.id}
+            element={element}
+            siteSlug={siteSlug}
+            pages={site.pages}
+          />
         ))}
       </main>
 

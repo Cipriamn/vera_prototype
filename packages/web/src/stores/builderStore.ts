@@ -134,7 +134,9 @@ const defaultProps: Record<ElementType, Record<string, unknown>> = {
   },
   button: {
     text: "Click me",
+    linkType: "external",
     url: "#",
+    pageId: undefined,
     openInNewTab: false,
     variant: "solid",
     size: "md",
@@ -172,6 +174,8 @@ interface BuilderState {
   loadSite: (siteId: string) => Promise<void>;
   loadPage: (siteId: string, pageId: string) => Promise<void>;
   savePage: () => Promise<void>;
+  createPage: (name: string) => Promise<string | null>;
+  deletePage: (pageId: string) => Promise<boolean>;
 
   addElement: (type: ElementType, index?: number, parentId?: string) => void;
   addGridChild: (gridId: string, cellIndex: number, type: ElementType) => void;
@@ -253,6 +257,53 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     } catch (error) {
       console.error("Failed to save page:", error);
       set({ isSaving: false });
+    }
+  },
+
+  createPage: async (name: string) => {
+    const { site } = get();
+    if (!site) return null;
+
+    try {
+      const response = await api.post(`/sites/${site.id}/pages`, { name });
+      const newPage = response.data.data;
+
+      // Update site with new page
+      set({
+        site: {
+          ...site,
+          pages: [...(site.pages || []), newPage],
+        },
+      });
+
+      return newPage.id;
+    } catch (error) {
+      console.error('Failed to create page:', error);
+      return null;
+    }
+  },
+
+  deletePage: async (pageId: string) => {
+    const { site, currentPage } = get();
+    if (!site) return false;
+
+    try {
+      await api.delete(`/sites/${site.id}/pages/${pageId}`);
+
+      // Update site pages list
+      set({
+        site: {
+          ...site,
+          pages: site.pages?.filter((p) => p.id !== pageId) || [],
+        },
+        // Clear current page if it was deleted
+        currentPage: currentPage?.id === pageId ? null : currentPage,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to delete page:', error);
+      return false;
     }
   },
 

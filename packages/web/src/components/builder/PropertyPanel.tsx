@@ -292,10 +292,11 @@ function VideoProperties({ element }: { element: Element }) {
 }
 
 function ButtonProperties({ element }: { element: Element }) {
-  const { updateElement } = useBuilderStore();
+  const { updateElement, site } = useBuilderStore();
 
   if (element.type !== "button") return null;
   const props = element.props;
+  const linkType = props.linkType || "external";
 
   return (
     <div className="space-y-4">
@@ -317,20 +318,81 @@ function ButtonProperties({ element }: { element: Element }) {
 
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
-          Link URL
+          Link Type
         </label>
-        <input
-          type="text"
-          value={props.url}
-          onChange={(e) =>
-            updateElement(element.id, {
-              props: { ...props, url: e.target.value },
-            })
-          }
-          placeholder="https://..."
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
-        />
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() =>
+              updateElement(element.id, {
+                props: { ...props, linkType: "external", pageId: undefined },
+              })
+            }
+            className={`flex-1 py-1.5 text-xs border rounded ${
+              linkType === "external"
+                ? "bg-primary-100 border-primary-300 text-primary-700"
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            External URL
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              updateElement(element.id, {
+                props: { ...props, linkType: "page", url: "" },
+              })
+            }
+            className={`flex-1 py-1.5 text-xs border rounded ${
+              linkType === "page"
+                ? "bg-primary-100 border-primary-300 text-primary-700"
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            Site Page
+          </button>
+        </div>
       </div>
+
+      {linkType === "external" ? (
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">URL</label>
+          <input
+            type="text"
+            value={props.url}
+            onChange={(e) =>
+              updateElement(element.id, {
+                props: { ...props, url: e.target.value },
+              })
+            }
+            placeholder="https://..."
+            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          />
+        </div>
+      ) : (
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Select Page</label>
+          <select
+            value={props.pageId || ""}
+            onChange={(e) =>
+              updateElement(element.id, {
+                props: { ...props, pageId: e.target.value || undefined },
+              })
+            }
+            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          >
+            <option value="">-- Select a page --</option>
+            {site?.pages?.map((page) => (
+              <option key={page.id} value={page.id}>
+                {page.name} {page.isHomepage ? '(Home)' : ''}
+              </option>
+            ))}
+          </select>
+          {!site?.pages?.length && (
+            <p className="text-xs text-gray-500 mt-1">No pages available</p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
