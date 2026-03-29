@@ -1,47 +1,15 @@
-import ButtonBlock from "@/components/elements/ButtonBlock";
-import ColumnLayout from "@/components/elements/ColumnLayout";
-import ImageBlock from "@/components/elements/ImageBlock";
-import TextBlock from "@/components/elements/TextBlock";
-import VideoBlock from "@/components/elements/VideoBlock";
 import {
   LayoutSlotBlockedOverlay,
   useDisallowedLayoutOverSlot,
 } from "@/hooks/useDisallowedLayoutOverSlot";
+import { gridAlignmentToCss } from "@/lib/flexMaps";
 import { useBuilderStore } from "@/stores/builderStore";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import type { Element, GridElement } from "@vera/shared";
 
 interface GridLayoutProps {
   element: GridElement;
-}
-
-function GridCellInner({
-  element,
-  isSelected,
-}: {
-  element: Element;
-  isSelected: boolean;
-}) {
-  switch (element.type) {
-    case "text":
-      return <TextBlock element={element} isEditing={isSelected} />;
-    case "image":
-      return <ImageBlock element={element} />;
-    case "video":
-      return <VideoBlock element={element} />;
-    case "button":
-      return <ButtonBlock element={element} />;
-    case "column":
-      return <ColumnLayout element={element} />;
-    case "grid":
-      return <GridLayout element={element} />;
-    default:
-      return (
-        <div className="p-2 rounded-md border border-builder-border bg-builder-surface-muted text-builder-text-muted text-xs">
-          Unknown element
-        </div>
-      );
-  }
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }
 
 function GridEmptyCell({
@@ -93,12 +61,14 @@ function GridFilledCell({
   child,
   isChildSelected,
   onSelectChild,
+  renderChild,
 }: {
   gridId: string;
   cellIndex: number;
   child: Element;
   isChildSelected: boolean;
   onSelectChild: (id: string) => void;
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }) {
   const disallowed = useDisallowedLayoutOverSlot();
   const { setNodeRef: setDropRef, isOver } = useDroppable({
@@ -152,7 +122,7 @@ function GridFilledCell({
       <div
         className={`w-full min-h-0 ${blocked ? "opacity-40" : ""} ${isChildSelected ? "ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-2 ring-offset-builder-canvas rounded-md" : ""}`}
       >
-        <GridCellInner element={child} isSelected={isChildSelected} />
+        {renderChild(child, isChildSelected)}
       </div>
     </div>
   );
@@ -164,12 +134,14 @@ function GridDropCell({
   child,
   isChildSelected,
   onSelectChild,
+  renderChild,
 }: {
   gridId: string;
   cellIndex: number;
   child: Element | undefined;
   isChildSelected: boolean;
   onSelectChild: (id: string) => void;
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }) {
   if (!child) {
     return <GridEmptyCell gridId={gridId} cellIndex={cellIndex} />;
@@ -181,11 +153,12 @@ function GridDropCell({
       child={child}
       isChildSelected={isChildSelected}
       onSelectChild={onSelectChild}
+      renderChild={renderChild}
     />
   );
 }
 
-export default function GridLayout({ element }: GridLayoutProps) {
+export default function GridLayout({ element, renderChild }: GridLayoutProps) {
   const props = element.props;
   const { selectedElementId, selectElement } = useBuilderStore();
 
@@ -195,6 +168,11 @@ export default function GridLayout({ element }: GridLayoutProps) {
 
   const totalCells = props.columns * props.rows;
   const children = element.children ?? [];
+  const columnGap = props.columnGap ?? props.gap;
+  const rowGap = props.rowGap ?? props.gap;
+  const minRow = props.minRowHeight ?? 80;
+  const alignItems = props.alignItems ?? "stretch";
+  const justifyItems = props.justifyItems ?? "stretch";
 
   return (
     <div
@@ -206,8 +184,11 @@ export default function GridLayout({ element }: GridLayoutProps) {
             : props.backgroundColor,
         display: "grid",
         gridTemplateColumns: `repeat(${props.columns}, 1fr)`,
-        gridTemplateRows: `repeat(${props.rows}, minmax(80px, auto))`,
-        gap: `${props.gap}px`,
+        gridTemplateRows: `repeat(${props.rows}, minmax(${minRow}px, auto))`,
+        columnGap: `${columnGap}px`,
+        rowGap: `${rowGap}px`,
+        alignItems: gridAlignmentToCss(alignItems),
+        justifyItems: gridAlignmentToCss(justifyItems),
       }}
     >
       {Array.from({ length: totalCells }).map((_, index) => {
@@ -220,6 +201,7 @@ export default function GridLayout({ element }: GridLayoutProps) {
             child={child}
             isChildSelected={child ? selectedElementId === child.id : false}
             onSelectChild={(id) => selectElement(id)}
+            renderChild={renderChild}
           />
         );
       })}
