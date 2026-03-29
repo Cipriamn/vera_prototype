@@ -37,7 +37,7 @@ function GridCellInner({
       return <GridLayout element={element} />;
     default:
       return (
-        <div className="p-2 bg-gray-100 text-gray-500 text-xs">
+        <div className="p-2 rounded-md border border-builder-border bg-builder-surface-muted text-builder-text-muted text-xs">
           Unknown element
         </div>
       );
@@ -67,13 +67,19 @@ function GridEmptyCell({
     <div
       ref={setNodeRef}
       className={`
-        relative min-h-[80px] border-2 border-dashed rounded-lg flex items-center justify-center p-1
-        ${blocked ? "border-gray-400 bg-gray-100" : isOver ? "border-primary-400 bg-primary-50" : "border-gray-200"}
+        relative min-h-[80px] border-2 border-dashed rounded-xl flex items-center justify-center p-1 transition-colors
+        ${
+          blocked
+            ? "border-zinc-400 dark:border-zinc-500 bg-builder-surface-muted"
+            : isOver
+              ? "border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/35"
+              : "border-builder-border bg-builder-surface-muted/40"
+        }
       `}
     >
       <LayoutSlotBlockedOverlay show={blocked} />
       <span
-        className={`text-xs pointer-events-none ${blocked ? "text-gray-500 opacity-40" : "text-gray-400"}`}
+        className={`text-xs pointer-events-none font-medium ${blocked ? "text-builder-text-muted opacity-40" : "text-builder-text-muted"}`}
       >
         Cell {cellIndex + 1}
       </span>
@@ -131,14 +137,20 @@ function GridFilledCell({
         onSelectChild(child.id);
       }}
       className={`
-        relative min-h-[80px] border-2 border-dashed rounded-lg flex items-center justify-center p-1 cursor-grab active:cursor-grabbing items-stretch
-        ${blocked ? "border-gray-400 bg-gray-100" : isOver ? "border-primary-400 bg-primary-50" : "border-gray-200"}
+        relative min-h-[80px] border-2 border-dashed rounded-xl flex items-center justify-center p-1 cursor-grab active:cursor-grabbing items-stretch transition-colors
+        ${
+          blocked
+            ? "border-zinc-400 dark:border-zinc-500 bg-builder-surface-muted"
+            : isOver
+              ? "border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/35"
+              : "border-builder-border bg-builder-surface-muted/40"
+        }
         ${isDragging ? "opacity-50" : ""}
       `}
     >
       <LayoutSlotBlockedOverlay show={blocked} />
       <div
-        className={`w-full min-h-0 ${blocked ? "opacity-40" : ""} ${isChildSelected ? "ring-2 ring-primary-500 ring-offset-1 rounded" : ""}`}
+        className={`w-full min-h-0 ${blocked ? "opacity-40" : ""} ${isChildSelected ? "ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-2 ring-offset-builder-canvas rounded-md" : ""}`}
       >
         <GridCellInner element={child} isSelected={isChildSelected} />
       </div>
