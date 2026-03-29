@@ -1,8 +1,14 @@
+import type { BuilderTheme } from "@/hooks/useBuilderTheme";
 import { useBuilderStore } from "@/stores/builderStore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Toolbar() {
+type ToolbarProps = {
+  theme: BuilderTheme;
+  onToggleTheme: () => void;
+};
+
+export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
   const navigate = useNavigate();
   const [showNewPageModal, setShowNewPageModal] = useState(false);
   const [newPageName, setNewPageName] = useState("");
@@ -131,12 +137,11 @@ export default function Toolbar() {
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
-        {/* Left section */}
-        <div className="flex items-center gap-4">
+      <header className="h-14 shrink-0 flex items-center justify-between gap-3 px-4 md:px-5 border-b border-builder-border bg-builder-surface/80 backdrop-blur-md">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <Link
             to="/dashboard"
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
+            className="text-builder-text-muted hover:text-builder-text flex items-center gap-2 shrink-0 rounded-lg px-2 py-1.5 -ml-2 transition-colors hover:bg-builder-surface-muted"
           >
             <svg
               className="w-5 h-5"
@@ -151,24 +156,25 @@ export default function Toolbar() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Back</span>
+            <span className="text-sm font-medium hidden sm:inline">Back</span>
           </Link>
 
-          <div className="h-6 w-px bg-gray-200" />
+          <div className="h-6 w-px bg-builder-border shrink-0" />
 
-          <div>
-            <h1 className="text-sm font-semibold text-gray-900">
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold font-display text-builder-text truncate">
               {site?.name || "Loading..."}
             </h1>
-            <p className="text-xs text-gray-500">
-              Editing: {currentPage?.name || "Loading..."}
+            <p className="text-xs text-builder-text-muted truncate">
+              {currentPage?.name || "Loading..."}
             </p>
           </div>
         </div>
 
-        {/* Center section - Page selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Pages:</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-builder-text-muted hidden lg:inline">
+            Pages
+          </span>
           {site?.pages && site.pages.length > 0 && (
             <select
               value={currentPage?.id || ""}
@@ -176,7 +182,7 @@ export default function Toolbar() {
                 const pageId = e.target.value;
                 navigate(`/builder/${site.id}/${pageId}`);
               }}
-              className="text-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="builder-select text-sm py-1 max-w-[140px] md:max-w-[200px]"
             >
               {site.pages.map((page) => (
                 <option key={page.id} value={page.id}>
@@ -189,7 +195,7 @@ export default function Toolbar() {
             type="button"
             onClick={() => setShowPageSettingsModal(true)}
             disabled={!currentPage}
-            className="flex items-center gap-1 px-2 py-1 text-sm text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-sm text-builder-text border border-builder-border rounded-lg hover:bg-builder-surface-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Page name, URL, SEO, delete"
           >
             <svg
@@ -211,11 +217,12 @@ export default function Toolbar() {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            <span>Page settings</span>
+            <span className="hidden sm:inline">Page settings</span>
           </button>
           <button
+            type="button"
             onClick={() => setShowNewPageModal(true)}
-            className="flex items-center gap-1 px-2 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded-md"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/35 rounded-lg transition-colors"
             title="Add new page"
           >
             <svg
@@ -235,12 +242,50 @@ export default function Toolbar() {
           </button>
         </div>
 
-        {/* Right section */}
-        <div className="flex items-center gap-3">
-          {/* Save status */}
-          <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="p-2 rounded-lg border border-builder-border text-builder-text-muted hover:text-builder-text hover:bg-builder-surface-muted transition-colors"
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+          >
+            {theme === "dark" ? (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+            )}
+          </button>
+
+          <div className="hidden sm:flex items-center gap-2 text-sm text-builder-text-muted">
             {isSaving ? (
-              <span className="text-gray-500 flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <svg
                   className="w-4 h-4 animate-spin"
                   fill="none"
@@ -260,15 +305,15 @@ export default function Toolbar() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                Saving...
+                Saving…
               </span>
             ) : hasUnsavedChanges ? (
-              <span className="text-amber-600 flex items-center gap-1">
-                <span className="w-2 h-2 bg-amber-500 rounded-full" />
-                Unsaved changes
+              <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                Unsaved
               </span>
             ) : (
-              <span className="text-green-600 flex items-center gap-1">
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -287,22 +332,22 @@ export default function Toolbar() {
             )}
           </div>
 
-          <div className="h-6 w-px bg-gray-200" />
+          <div className="h-6 w-px bg-builder-border hidden sm:block" />
 
-          {/* Save button */}
           <button
+            type="button"
             onClick={handleSave}
             disabled={isSaving || !hasUnsavedChanges}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
           >
             Save
           </button>
 
-          {/* Preview button */}
           <button
+            type="button"
             onClick={handlePreview}
             disabled={!site?.isPublished}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="hidden md:inline-flex px-3 py-1.5 text-sm rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
             title={
               !site?.isPublished ? "Publish site to preview" : "Preview site"
             }
@@ -310,18 +355,19 @@ export default function Toolbar() {
             Preview
           </button>
 
-          {/* Publish/Unpublish button */}
           {site?.isPublished ? (
             <button
+              type="button"
               onClick={handleUnpublish}
-              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              className="px-3 py-1.5 text-sm rounded-lg bg-builder-surface-muted text-builder-text hover:opacity-90 transition-opacity"
             >
               Unpublish
             </button>
           ) : (
             <button
+              type="button"
               onClick={handlePublish}
-              className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700"
+              className="px-4 py-1.5 text-sm font-semibold rounded-full bg-primary-600 text-white hover:bg-primary-500 shadow-sm shadow-primary-600/25 transition-colors"
             >
               Publish
             </button>
@@ -331,9 +377,9 @@ export default function Toolbar() {
 
       {/* Page settings modal */}
       {showPageSettingsModal && currentPage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="builder-modal-overlay">
+          <div className="builder-modal-panel max-h-[90vh] overflow-y-auto max-w-md">
+            <h2 className="text-lg font-semibold font-display text-builder-text mb-4">
               Page settings
             </h2>
 
@@ -341,7 +387,7 @@ export default function Toolbar() {
               <div>
                 <label
                   htmlFor="editPageName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="builder-field-label !text-sm !text-builder-text"
                 >
                   Page name
                 </label>
@@ -350,14 +396,14 @@ export default function Toolbar() {
                   type="text"
                   value={pageName}
                   onChange={(e) => setPageName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="builder-input py-2 px-3"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="editPageSlug"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="builder-field-label !text-sm !text-builder-text"
                 >
                   URL slug
                 </label>
@@ -366,9 +412,9 @@ export default function Toolbar() {
                   type="text"
                   value={pageSlug}
                   onChange={(e) => setPageSlug(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"
+                  className="builder-input py-2 px-3 font-mono text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-builder-text-muted mt-1">
                   Published URL: /s/{site?.slug}/{pageSlug || "…"}
                 </p>
               </div>
@@ -376,7 +422,7 @@ export default function Toolbar() {
               <div>
                 <label
                   htmlFor="editMetaTitle"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="builder-field-label !text-sm !text-builder-text"
                 >
                   Meta title (SEO)
                 </label>
@@ -387,14 +433,14 @@ export default function Toolbar() {
                   onChange={(e) => setPageMetaTitle(e.target.value)}
                   placeholder="Optional; defaults to page name in preview"
                   maxLength={200}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="builder-input py-2 px-3"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="editMetaDescription"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="builder-field-label !text-sm !text-builder-text"
                 >
                   Meta description (SEO)
                 </label>
@@ -405,7 +451,7 @@ export default function Toolbar() {
                   placeholder="Short summary for search and sharing"
                   rows={3}
                   maxLength={500}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  className="builder-input py-2 px-3 min-h-[5rem]"
                 />
               </div>
 
@@ -415,19 +461,22 @@ export default function Toolbar() {
                   checked={onlyPage ? true : pageIsHomepage}
                   disabled={onlyPage}
                   onChange={(e) => setPageIsHomepage(e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="rounded border-builder-border text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400"
                 />
-                <span className="text-sm text-gray-700">Homepage</span>
+                <span className="text-sm text-builder-text">Homepage</span>
               </label>
               {onlyPage && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-builder-text-muted">
                   The only page in this site is always the homepage.
                 </p>
               )}
             </div>
 
             {pageSettingsError && (
-              <p className="mt-3 text-sm text-red-600" role="alert">
+              <p
+                className="mt-3 text-sm text-red-600 dark:text-red-400"
+                role="alert"
+              >
                 {pageSettingsError}
               </p>
             )}
@@ -440,7 +489,7 @@ export default function Toolbar() {
                     setShowPageSettingsModal(false);
                     setPageSettingsError(null);
                   }}
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                  className="px-4 py-2 text-sm text-builder-text hover:bg-builder-surface-muted rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -448,7 +497,7 @@ export default function Toolbar() {
                   type="button"
                   onClick={handleSavePageSettings}
                   disabled={isSavingPageSettings}
-                  className="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-500 disabled:opacity-50 transition-colors"
                 >
                   {isSavingPageSettings ? "Saving…" : "Save"}
                 </button>
@@ -457,7 +506,7 @@ export default function Toolbar() {
                 <button
                   type="button"
                   onClick={handleDeletePage}
-                  className="w-full px-4 py-2 text-sm border border-red-300 text-red-700 rounded-md hover:bg-red-50"
+                  className="w-full px-4 py-2 text-sm border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                 >
                   Delete this page
                 </button>
@@ -469,17 +518,17 @@ export default function Toolbar() {
 
       {/* New Page Modal */}
       {showNewPageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Create New Page
+        <div className="builder-modal-overlay">
+          <div className="builder-modal-panel max-w-md">
+            <h2 className="text-lg font-semibold font-display text-builder-text mb-4">
+              Create new page
             </h2>
             <div className="mb-4">
               <label
                 htmlFor="pageName"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="builder-field-label !text-sm !text-builder-text"
               >
-                Page Name
+                Page name
               </label>
               <input
                 type="text"
@@ -494,26 +543,28 @@ export default function Toolbar() {
                   }
                 }}
                 placeholder="e.g., About, Contact, Gallery"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="builder-input py-2 px-3"
                 autoFocus
               />
             </div>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => {
                   setShowNewPageModal(false);
                   setNewPageName("");
                 }}
-                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                className="px-4 py-2 text-sm text-builder-text hover:bg-builder-surface-muted rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleCreatePage}
                 disabled={!newPageName.trim() || isCreatingPage}
-                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isCreatingPage ? "Creating..." : "Create Page"}
+                {isCreatingPage ? "Creating…" : "Create page"}
               </button>
             </div>
           </div>
