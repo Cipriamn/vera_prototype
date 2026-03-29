@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
-import { api } from '@/utils/api';
-import type { Site } from '@vera/shared';
+import { useAuthStore } from "@/stores/authStore";
+import { api } from "@/utils/api";
+import type { Site } from "@vera/shared";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -10,7 +10,8 @@ export default function Dashboard() {
   const [sites, setSites] = useState<Site[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newSiteName, setNewSiteName] = useState('');
+  const [newSiteName, setNewSiteName] = useState("");
+  const [createSiteError, setCreateSiteError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
@@ -19,10 +20,10 @@ export default function Dashboard() {
 
   const loadSites = async () => {
     try {
-      const response = await api.get('/sites');
+      const response = await api.get("/sites");
       setSites(response.data.data || []);
     } catch (error) {
-      console.error('Failed to load sites:', error);
+      console.error("Failed to load sites:", error);
     } finally {
       setIsLoading(false);
     }
@@ -33,34 +34,39 @@ export default function Dashboard() {
     if (!newSiteName.trim()) return;
 
     setIsCreating(true);
+    setCreateSiteError(null);
     try {
-      const response = await api.post('/sites', { name: newSiteName });
+      const response = await api.post("/sites", { name: newSiteName });
       const newSite = response.data.data;
       setSites([...sites, newSite]);
       setShowCreateModal(false);
-      setNewSiteName('');
+      setNewSiteName("");
+      setCreateSiteError(null);
       navigate(`/builder/${newSite.id}`);
     } catch (error) {
-      console.error('Failed to create site:', error);
+      console.error("Failed to create site:", error);
+      setCreateSiteError(
+        error instanceof Error ? error.message : "Failed to create site",
+      );
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleDeleteSite = async (siteId: string) => {
-    if (!confirm('Are you sure you want to delete this site?')) return;
+    if (!confirm("Are you sure you want to delete this site?")) return;
 
     try {
       await api.delete(`/sites/${siteId}`);
       setSites(sites.filter((s) => s.id !== siteId));
     } catch (error) {
-      console.error('Failed to delete site:', error);
+      console.error("Failed to delete site:", error);
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -68,7 +74,9 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Vera Site Builder</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Vera Site Builder
+          </h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
               {user?.name || user?.email}
@@ -88,7 +96,10 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-xl font-semibold text-gray-900">Your Sites</h2>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setCreateSiteError(null);
+              setShowCreateModal(true);
+            }}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             Create New Site
@@ -115,12 +126,17 @@ export default function Dashboard() {
                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">No sites yet</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">
+              No sites yet
+            </h3>
             <p className="mt-2 text-gray-600">
               Get started by creating your first website.
             </p>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setCreateSiteError(null);
+                setShowCreateModal(true);
+              }}
               className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Create Your First Site
@@ -144,11 +160,11 @@ export default function Dashboard() {
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${
                         site.isPublished
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {site.isPublished ? 'Published' : 'Draft'}
+                      {site.isPublished ? "Published" : "Draft"}
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 mb-4">
@@ -203,18 +219,27 @@ export default function Dashboard() {
                   id="siteName"
                   type="text"
                   value={newSiteName}
-                  onChange={(e) => setNewSiteName(e.target.value)}
+                  onChange={(e) => {
+                    setNewSiteName(e.target.value);
+                    setCreateSiteError(null);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="My Awesome Site"
                   autoFocus
                 />
+                {createSiteError && (
+                  <p className="mt-2 text-sm text-red-600" role="alert">
+                    {createSiteError}
+                  </p>
+                )}
               </div>
               <div className="flex gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
-                    setNewSiteName('');
+                    setNewSiteName("");
+                    setCreateSiteError(null);
                   }}
                   className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
@@ -225,7 +250,7 @@ export default function Dashboard() {
                   disabled={isCreating || !newSiteName.trim()}
                   className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
                 >
-                  {isCreating ? 'Creating...' : 'Create Site'}
+                  {isCreating ? "Creating..." : "Create Site"}
                 </button>
               </div>
             </form>
