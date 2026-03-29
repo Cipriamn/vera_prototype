@@ -36,6 +36,10 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
     updatePageDetails,
     publishSite,
     unpublishSite,
+    past,
+    future,
+    undo,
+    redo,
   } = useBuilderStore();
 
   useEffect(() => {
@@ -338,9 +342,55 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
 
           <button
             type="button"
+            onClick={() => undo()}
+            disabled={past.length === 0}
+            className="p-2.5 min-h-[2.5rem] min-w-[2.5rem] inline-flex items-center justify-center rounded-lg border border-builder-border text-builder-text-muted hover:text-builder-text hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
+            title="Undo (Ctrl+Z or ⌘Z)"
+            aria-label="Undo"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => redo()}
+            disabled={future.length === 0}
+            className="p-2.5 min-h-[2.5rem] min-w-[2.5rem] inline-flex items-center justify-center rounded-lg border border-builder-border text-builder-text-muted hover:text-builder-text hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
+            title="Redo (Ctrl+Shift+Z, Ctrl+Y, or ⌘⇧Z)"
+            aria-label="Redo"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"
+              />
+            </svg>
+          </button>
+
+          <button
+            type="button"
             onClick={handleSave}
             disabled={isSaving || !hasUnsavedChanges}
             className="px-4 py-2 min-h-[2.5rem] text-sm font-medium rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
+            title="Save (Ctrl+S or ⌘S)"
           >
             Save
           </button>
