@@ -159,6 +159,35 @@ function remapSubtreeIds(el: Element): Element {
   return base;
 }
 
+const MAX_UNDO = 50;
+
+function cloneElementsForHistory(elements: Element[]): Element[] {
+  return JSON.parse(JSON.stringify(elements)) as Element[];
+}
+
+function elementIdExistsInTree(list: Element[], id: string): boolean {
+  for (const el of list) {
+    if (el.id === id) return true;
+    if (isLayoutElement(el) && el.children?.length) {
+      if (elementIdExistsInTree(el.children, id)) return true;
+    }
+  }
+  return false;
+}
+
+/** One undo step per burst of property edits (avoids one step per keystroke). */
+const UPDATE_ELEMENT_COALESCE_MS = 450;
+let updateElementCoalesceActive = false;
+let updateElementCoalesceTimer: ReturnType<typeof setTimeout> | null = null;
+
+function resetUpdateElementCoalesce() {
+  updateElementCoalesceActive = false;
+  if (updateElementCoalesceTimer) {
+    clearTimeout(updateElementCoalesceTimer);
+    updateElementCoalesceTimer = null;
+  }
+}
+
 interface BuilderState {
   site: Site | null;
   currentPage: Page | null;
@@ -167,6 +196,8 @@ interface BuilderState {
   isLoading: boolean;
   isSaving: boolean;
   hasUnsavedChanges: boolean;
+  past: Element[][];
+  future: Element[][];
 
   // Actions
   loadSite: (siteId: string) => Promise<void>;
@@ -222,515 +253,597 @@ interface BuilderState {
   selectElement: (id: string | null) => void;
   setElements: (elements: Element[]) => void;
 
+  undo: () => void;
+  redo: () => void;
+
   publishSite: () => Promise<void>;
   unpublishSite: () => Promise<void>;
 }
 
-export const useBuilderStore = create<BuilderState>((set, get) => ({
-  site: null,
-  currentPage: null,
-  elements: [],
-  selectedElementId: null,
-  isLoading: false,
-  isSaving: false,
-  hasUnsavedChanges: false,
+export const useBuilderStore = create<BuilderState>((set, get) => {
+  type ElementsSnapshotPatch = Pick<BuilderState, "elements"> &
+    Partial<Pick<BuilderState, "selectedElementId">>;
 
-  loadSite: async (siteId: string) => {
-    set({ isLoading: true });
-    try {
-      const response = await api.get(`/sites/${siteId}`);
-      set({ site: response.data.data, isLoading: false });
-    } catch (error) {
-      console.error("Failed to load site:", error);
-      set({ isLoading: false });
-    }
-  },
+  const pushHistoryAndSet = (patch: ElementsSnapshotPatch) => {
+    resetUpdateElementCoalesce();
+    const { elements, past } = get();
+    const { elements: newElements, ...rest } = patch;
+    set({
+      past: [...past, cloneElementsForHistory(elements)].slice(-MAX_UNDO),
+      future: [],
+      hasUnsavedChanges: true,
+      ...rest,
+      elements: newElements,
+    });
+  };
 
-  loadPage: async (siteId: string, pageId: string) => {
-    set({ isLoading: true });
-    try {
-      const response = await api.get(`/sites/${siteId}/pages/${pageId}`);
-      const page = response.data.data;
-      set({
-        currentPage: page,
-        elements: page.elements || [],
-        isLoading: false,
-        hasUnsavedChanges: false,
+  return {
+    site: null,
+    currentPage: null,
+    elements: [],
+    selectedElementId: null,
+    isLoading: false,
+    isSaving: false,
+    hasUnsavedChanges: false,
+    past: [],
+    future: [],
+
+    loadSite: async (siteId: string) => {
+      set({ isLoading: true });
+      try {
+        const response = await api.get(`/sites/${siteId}`);
+        set({ site: response.data.data, isLoading: false });
+      } catch (error) {
+        console.error("Failed to load site:", error);
+        set({ isLoading: false });
+      }
+    },
+
+    loadPage: async (siteId: string, pageId: string) => {
+      set({ isLoading: true });
+      try {
+        const response = await api.get(`/sites/${siteId}/pages/${pageId}`);
+        const page = response.data.data;
+        resetUpdateElementCoalesce();
+        set({
+          currentPage: page,
+          elements: page.elements || [],
+          isLoading: false,
+          hasUnsavedChanges: false,
+          past: [],
+          future: [],
+        });
+      } catch (error) {
+        console.error("Failed to load page:", error);
+        set({ isLoading: false });
+      }
+    },
+
+    savePage: async () => {
+      const { site, currentPage, elements } = get();
+      if (!site || !currentPage) return;
+
+      set({ isSaving: true });
+      try {
+        await api.put(`/sites/${site.id}/pages/${currentPage.id}`, {
+          elements,
+        });
+        set({ isSaving: false, hasUnsavedChanges: false });
+      } catch (error) {
+        console.error("Failed to save page:", error);
+        set({ isSaving: false });
+      }
+    },
+
+    createPage: async (name: string) => {
+      const { site } = get();
+      if (!site) return null;
+
+      try {
+        const response = await api.post(`/sites/${site.id}/pages`, { name });
+        const newPage = response.data.data;
+
+        // Update site with new page
+        set({
+          site: {
+            ...site,
+            pages: [...(site.pages || []), newPage],
+          },
+        });
+
+        return newPage.id;
+      } catch (error) {
+        console.error("Failed to create page:", error);
+        return null;
+      }
+    },
+
+    deletePage: async (pageId: string) => {
+      const { site, currentPage } = get();
+      if (!site) {
+        return { ok: false as const, error: "No site loaded" };
+      }
+
+      try {
+        await api.delete(`/sites/${site.id}/pages/${pageId}`);
+
+        set({
+          site: {
+            ...site,
+            pages: site.pages?.filter((p) => p.id !== pageId) || [],
+          },
+          currentPage: currentPage?.id === pageId ? null : currentPage,
+        });
+
+        return { ok: true as const };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to delete page";
+        console.error("Failed to delete page:", error);
+        return { ok: false as const, error: message };
+      }
+    },
+
+    updatePageDetails: async (input) => {
+      const { site, currentPage } = get();
+      if (!site || !currentPage) {
+        return { ok: false as const, error: "No page loaded" };
+      }
+
+      try {
+        const response = await api.put(
+          `/sites/${site.id}/pages/${currentPage.id}`,
+          {
+            name: input.name.trim(),
+            slug: input.slug.trim(),
+            metaTitle: input.metaTitle,
+            metaDescription: input.metaDescription,
+            isHomepage: input.isHomepage,
+          },
+        );
+        const updated = response.data.data;
+
+        await get().loadSite(site.id);
+
+        const prev = get().currentPage;
+        set({
+          currentPage:
+            prev && prev.id === updated.id
+              ? {
+                  ...prev,
+                  name: updated.name,
+                  slug: updated.slug,
+                  metaTitle: updated.metaTitle ?? null,
+                  metaDescription: updated.metaDescription ?? null,
+                  isHomepage: updated.isHomepage,
+                  updatedAt: updated.updatedAt,
+                }
+              : prev,
+        });
+
+        return { ok: true as const };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to update page";
+        console.error("Failed to update page details:", error);
+        return { ok: false as const, error: message };
+      }
+    },
+
+    addElement: (type: ElementType, index?: number, parentId?: string) => {
+      const { elements } = get();
+      const newElement = {
+        id: uuidv4(),
+        type,
+        props: cloneDefaultElementProps(type),
+        parentId,
+        order: index ?? elements.length,
+        ...(isLayoutType(type) ? { children: [] } : {}),
+      } as unknown as Element;
+
+      let newElements: Element[];
+      if (index !== undefined) {
+        newElements = [
+          ...elements.slice(0, index),
+          newElement,
+          ...elements.slice(index),
+        ].map((el, i) => ({ ...el, order: i }));
+      } else {
+        newElements = [...elements, newElement];
+      }
+
+      pushHistoryAndSet({
+        elements: newElements,
+        selectedElementId: newElement.id,
       });
-    } catch (error) {
-      console.error("Failed to load page:", error);
-      set({ isLoading: false });
-    }
-  },
+    },
 
-  savePage: async () => {
-    const { site, currentPage, elements } = get();
-    if (!site || !currentPage) return;
+    addGridChild: (gridId: string, cellIndex: number, type: ElementType) => {
+      if (isNestedLayoutDisallowedInSlot(type)) return;
 
-    set({ isSaving: true });
-    try {
-      await api.put(`/sites/${site.id}/pages/${currentPage.id}`, {
+      const { elements } = get();
+      const newChild = {
+        id: uuidv4(),
+        type,
+        props: cloneDefaultElementProps(type),
+        order: cellIndex,
+        ...(isLayoutType(type) ? { children: [] } : {}),
+      } as unknown as Element;
+
+      const newElements = insertIntoGridAtCell(
         elements,
-      });
-      set({ isSaving: false, hasUnsavedChanges: false });
-    } catch (error) {
-      console.error("Failed to save page:", error);
-      set({ isSaving: false });
-    }
-  },
-
-  createPage: async (name: string) => {
-    const { site } = get();
-    if (!site) return null;
-
-    try {
-      const response = await api.post(`/sites/${site.id}/pages`, { name });
-      const newPage = response.data.data;
-
-      // Update site with new page
-      set({
-        site: {
-          ...site,
-          pages: [...(site.pages || []), newPage],
-        },
-      });
-
-      return newPage.id;
-    } catch (error) {
-      console.error("Failed to create page:", error);
-      return null;
-    }
-  },
-
-  deletePage: async (pageId: string) => {
-    const { site, currentPage } = get();
-    if (!site) {
-      return { ok: false as const, error: "No site loaded" };
-    }
-
-    try {
-      await api.delete(`/sites/${site.id}/pages/${pageId}`);
-
-      set({
-        site: {
-          ...site,
-          pages: site.pages?.filter((p) => p.id !== pageId) || [],
-        },
-        currentPage: currentPage?.id === pageId ? null : currentPage,
-      });
-
-      return { ok: true as const };
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete page";
-      console.error("Failed to delete page:", error);
-      return { ok: false as const, error: message };
-    }
-  },
-
-  updatePageDetails: async (input) => {
-    const { site, currentPage } = get();
-    if (!site || !currentPage) {
-      return { ok: false as const, error: "No page loaded" };
-    }
-
-    try {
-      const response = await api.put(
-        `/sites/${site.id}/pages/${currentPage.id}`,
-        {
-          name: input.name.trim(),
-          slug: input.slug.trim(),
-          metaTitle: input.metaTitle,
-          metaDescription: input.metaDescription,
-          isHomepage: input.isHomepage,
-        },
+        gridId,
+        cellIndex,
+        newChild,
       );
-      const updated = response.data.data;
 
-      await get().loadSite(site.id);
+      pushHistoryAndSet({
+        elements: newElements,
+        selectedElementId: newChild.id,
+      });
+    },
 
-      const prev = get().currentPage;
-      set({
-        currentPage:
-          prev && prev.id === updated.id
-            ? {
-                ...prev,
-                name: updated.name,
-                slug: updated.slug,
-                metaTitle: updated.metaTitle ?? null,
-                metaDescription: updated.metaDescription ?? null,
-                isHomepage: updated.isHomepage,
-                updatedAt: updated.updatedAt,
-              }
-            : prev,
+    addColumnChild: (
+      columnId: string,
+      slotIndex: number,
+      type: ElementType,
+    ) => {
+      if (isNestedLayoutDisallowedInSlot(type)) return;
+
+      const { elements } = get();
+      const newChild = {
+        id: uuidv4(),
+        type,
+        props: cloneDefaultElementProps(type),
+        order: slotIndex,
+        ...(isLayoutType(type) ? { children: [] } : {}),
+      } as unknown as Element;
+
+      const newElements = insertIntoColumnAtSlot(
+        elements,
+        columnId,
+        slotIndex,
+        newChild,
+      );
+
+      pushHistoryAndSet({
+        elements: newElements,
+        selectedElementId: newChild.id,
+      });
+    },
+
+    addFlowChild: (
+      flowId: string,
+      flowType: FlowLayoutType,
+      insertIndex: number,
+      type: ElementType,
+    ) => {
+      if (isNestedLayoutDisallowedInSlot(type)) return;
+
+      const { elements } = get();
+      const newChild = {
+        id: uuidv4(),
+        type,
+        props: cloneDefaultElementProps(type),
+        order: insertIndex,
+        ...(isLayoutType(type) ? { children: [] } : {}),
+      } as unknown as Element;
+
+      const newElements = addToFlowAt(
+        elements,
+        flowId,
+        flowType,
+        insertIndex,
+        newChild,
+      );
+
+      pushHistoryAndSet({
+        elements: newElements,
+        selectedElementId: newChild.id,
+      });
+    },
+
+    moveElementToFlowSlot: (
+      elementId: string,
+      flowId: string,
+      flowType: FlowLayoutType,
+      insertIndex: number,
+    ) => {
+      if (elementId === flowId) return;
+
+      const { elements } = get();
+      const { next: without, found } = pluckElement(elements, elementId);
+      if (!found) return;
+
+      if (isNestedLayoutDisallowedInSlot(found.type)) return;
+
+      if (isLayoutElement(found) && containsDescendantId(found, flowId)) return;
+
+      const inserted = addToFlowAt(without, flowId, flowType, insertIndex, {
+        ...found,
+        order: insertIndex,
       });
 
-      return { ok: true as const };
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to update page";
-      console.error("Failed to update page details:", error);
-      return { ok: false as const, error: message };
-    }
-  },
+      pushHistoryAndSet({
+        elements: inserted,
+        selectedElementId: elementId,
+      });
+    },
 
-  addElement: (type: ElementType, index?: number, parentId?: string) => {
-    const { elements } = get();
-    const newElement = {
-      id: uuidv4(),
-      type,
-      props: cloneDefaultElementProps(type),
-      parentId,
-      order: index ?? elements.length,
-      ...(isLayoutType(type) ? { children: [] } : {}),
-    } as unknown as Element;
+    moveElementToGridCell: (
+      elementId: string,
+      gridId: string,
+      cellIndex: number,
+    ) => {
+      if (elementId === gridId) return;
 
-    let newElements: Element[];
-    if (index !== undefined) {
-      newElements = [
-        ...elements.slice(0, index),
-        newElement,
-        ...elements.slice(index),
+      const { elements } = get();
+      const { next: without, found } = pluckElement(elements, elementId);
+      if (!found) return;
+
+      if (isNestedLayoutDisallowedInSlot(found.type)) return;
+
+      if (isLayoutElement(found) && containsDescendantId(found, gridId)) return;
+
+      const inserted = insertIntoGridAtCell(without, gridId, cellIndex, {
+        ...found,
+        order: cellIndex,
+      });
+
+      pushHistoryAndSet({
+        elements: inserted,
+        selectedElementId: elementId,
+      });
+    },
+
+    moveElementToColumnSlot: (
+      elementId: string,
+      columnId: string,
+      slotIndex: number,
+    ) => {
+      if (elementId === columnId) return;
+
+      const { elements } = get();
+      const { next: without, found } = pluckElement(elements, elementId);
+      if (!found) return;
+
+      if (isNestedLayoutDisallowedInSlot(found.type)) return;
+
+      if (isLayoutElement(found) && containsDescendantId(found, columnId))
+        return;
+
+      const inserted = insertIntoColumnAtSlot(without, columnId, slotIndex, {
+        ...found,
+        order: slotIndex,
+      });
+
+      pushHistoryAndSet({
+        elements: inserted,
+        selectedElementId: elementId,
+      });
+    },
+
+    moveElementToRoot: (elementId: string, insertIndex: number) => {
+      const { elements } = get();
+      const { next: without, found } = pluckElement(elements, elementId);
+      if (!found) return;
+
+      const roots = [...without].sort((a, b) => a.order - b.order);
+      const clamped = Math.max(0, Math.min(insertIndex, roots.length));
+      const nextRoots = [
+        ...roots.slice(0, clamped),
+        { ...found, parentId: undefined, order: clamped },
+        ...roots.slice(clamped),
       ].map((el, i) => ({ ...el, order: i }));
-    } else {
-      newElements = [...elements, newElement];
-    }
 
-    set({
-      elements: newElements,
-      selectedElementId: newElement.id,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  addGridChild: (gridId: string, cellIndex: number, type: ElementType) => {
-    if (isNestedLayoutDisallowedInSlot(type)) return;
-
-    const { elements } = get();
-    const newChild = {
-      id: uuidv4(),
-      type,
-      props: cloneDefaultElementProps(type),
-      order: cellIndex,
-      ...(isLayoutType(type) ? { children: [] } : {}),
-    } as unknown as Element;
-
-    const newElements = insertIntoGridAtCell(
-      elements,
-      gridId,
-      cellIndex,
-      newChild,
-    );
-
-    set({
-      elements: newElements,
-      selectedElementId: newChild.id,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  addColumnChild: (columnId: string, slotIndex: number, type: ElementType) => {
-    if (isNestedLayoutDisallowedInSlot(type)) return;
-
-    const { elements } = get();
-    const newChild = {
-      id: uuidv4(),
-      type,
-      props: cloneDefaultElementProps(type),
-      order: slotIndex,
-      ...(isLayoutType(type) ? { children: [] } : {}),
-    } as unknown as Element;
-
-    const newElements = insertIntoColumnAtSlot(
-      elements,
-      columnId,
-      slotIndex,
-      newChild,
-    );
-
-    set({
-      elements: newElements,
-      selectedElementId: newChild.id,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  addFlowChild: (
-    flowId: string,
-    flowType: FlowLayoutType,
-    insertIndex: number,
-    type: ElementType,
-  ) => {
-    if (isNestedLayoutDisallowedInSlot(type)) return;
-
-    const { elements } = get();
-    const newChild = {
-      id: uuidv4(),
-      type,
-      props: cloneDefaultElementProps(type),
-      order: insertIndex,
-      ...(isLayoutType(type) ? { children: [] } : {}),
-    } as unknown as Element;
-
-    const newElements = addToFlowAt(
-      elements,
-      flowId,
-      flowType,
-      insertIndex,
-      newChild,
-    );
-
-    set({
-      elements: newElements,
-      selectedElementId: newChild.id,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  moveElementToFlowSlot: (
-    elementId: string,
-    flowId: string,
-    flowType: FlowLayoutType,
-    insertIndex: number,
-  ) => {
-    if (elementId === flowId) return;
-
-    const { elements } = get();
-    const { next: without, found } = pluckElement(elements, elementId);
-    if (!found) return;
-
-    if (isNestedLayoutDisallowedInSlot(found.type)) return;
-
-    if (isLayoutElement(found) && containsDescendantId(found, flowId)) return;
-
-    const inserted = addToFlowAt(without, flowId, flowType, insertIndex, {
-      ...found,
-      order: insertIndex,
-    });
-
-    set({
-      elements: inserted,
-      selectedElementId: elementId,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  moveElementToGridCell: (
-    elementId: string,
-    gridId: string,
-    cellIndex: number,
-  ) => {
-    if (elementId === gridId) return;
-
-    const { elements } = get();
-    const { next: without, found } = pluckElement(elements, elementId);
-    if (!found) return;
-
-    if (isNestedLayoutDisallowedInSlot(found.type)) return;
-
-    if (isLayoutElement(found) && containsDescendantId(found, gridId)) return;
-
-    const inserted = insertIntoGridAtCell(without, gridId, cellIndex, {
-      ...found,
-      order: cellIndex,
-    });
-
-    set({
-      elements: inserted,
-      selectedElementId: elementId,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  moveElementToColumnSlot: (
-    elementId: string,
-    columnId: string,
-    slotIndex: number,
-  ) => {
-    if (elementId === columnId) return;
-
-    const { elements } = get();
-    const { next: without, found } = pluckElement(elements, elementId);
-    if (!found) return;
-
-    if (isNestedLayoutDisallowedInSlot(found.type)) return;
-
-    if (isLayoutElement(found) && containsDescendantId(found, columnId)) return;
-
-    const inserted = insertIntoColumnAtSlot(without, columnId, slotIndex, {
-      ...found,
-      order: slotIndex,
-    });
-
-    set({
-      elements: inserted,
-      selectedElementId: elementId,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  moveElementToRoot: (elementId: string, insertIndex: number) => {
-    const { elements } = get();
-    const { next: without, found } = pluckElement(elements, elementId);
-    if (!found) return;
-
-    const roots = [...without].sort((a, b) => a.order - b.order);
-    const clamped = Math.max(0, Math.min(insertIndex, roots.length));
-    const nextRoots = [
-      ...roots.slice(0, clamped),
-      { ...found, parentId: undefined, order: clamped },
-      ...roots.slice(clamped),
-    ].map((el, i) => ({ ...el, order: i }));
-
-    set({
-      elements: nextRoots,
-      selectedElementId: elementId,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  updateElement: (id: string, updates: Partial<Element>) => {
-    const { elements } = get();
-
-    const tryPatchChildren = (
-      list: Element[],
-    ): { next: Element[]; hit: boolean } => {
-      let hit = false;
-      const next = list.map((el) => {
-        if (el.id === id) {
-          hit = true;
-          return { ...el, ...updates } as Element;
-        }
-        if (isLayoutElement(el) && el.children?.length) {
-          const { next: ch, hit: childHit } = tryPatchChildren(el.children);
-          if (childHit) {
-            hit = true;
-            return { ...(el as LayoutElement), children: ch } as Element;
-          }
-        }
-        return el;
+      pushHistoryAndSet({
+        elements: nextRoots,
+        selectedElementId: elementId,
       });
-      return { next, hit };
-    };
+    },
 
-    const { next, hit } = tryPatchChildren(elements);
-    if (!hit) return;
+    updateElement: (id: string, updates: Partial<Element>) => {
+      const { elements } = get();
 
-    set({
-      elements: next,
-      hasUnsavedChanges: true,
-    });
-  },
+      const tryPatchChildren = (
+        list: Element[],
+      ): { next: Element[]; hit: boolean } => {
+        let hit = false;
+        const next = list.map((el) => {
+          if (el.id === id) {
+            hit = true;
+            return { ...el, ...updates } as Element;
+          }
+          if (isLayoutElement(el) && el.children?.length) {
+            const { next: ch, hit: childHit } = tryPatchChildren(el.children);
+            if (childHit) {
+              hit = true;
+              return { ...(el as LayoutElement), children: ch } as Element;
+            }
+          }
+          return el;
+        });
+        return { next, hit };
+      };
 
-  deleteElement: (id: string) => {
-    const { elements, selectedElementId } = get();
+      const { next, hit } = tryPatchChildren(elements);
+      if (!hit) return;
 
-    const removeFromTree = (
-      list: Element[],
-      targetId: string,
-    ): { next: Element[]; removed: boolean } => {
-      let removed = false;
-      const next: Element[] = [];
-      for (const el of list) {
-        if (el.id === targetId) {
-          removed = true;
-          continue;
-        }
-        if (isLayoutElement(el) && el.children?.length) {
-          const { next: ch, removed: childRemoved } = removeFromTree(
-            el.children,
-            targetId,
-          );
-          if (childRemoved) {
+      if (!updateElementCoalesceActive) {
+        updateElementCoalesceActive = true;
+        const { elements: prev, past } = get();
+        set({
+          past: [...past, cloneElementsForHistory(prev)].slice(-MAX_UNDO),
+          future: [],
+          hasUnsavedChanges: true,
+          elements: next,
+        });
+      } else {
+        set({ elements: next, hasUnsavedChanges: true });
+      }
+      if (updateElementCoalesceTimer) clearTimeout(updateElementCoalesceTimer);
+      updateElementCoalesceTimer = setTimeout(() => {
+        updateElementCoalesceActive = false;
+        updateElementCoalesceTimer = null;
+      }, UPDATE_ELEMENT_COALESCE_MS);
+    },
+
+    deleteElement: (id: string) => {
+      const { elements, selectedElementId } = get();
+
+      const removeFromTree = (
+        list: Element[],
+        targetId: string,
+      ): { next: Element[]; removed: boolean } => {
+        let removed = false;
+        const next: Element[] = [];
+        for (const el of list) {
+          if (el.id === targetId) {
             removed = true;
-            next.push({ ...(el as LayoutElement), children: ch } as Element);
             continue;
           }
+          if (isLayoutElement(el) && el.children?.length) {
+            const { next: ch, removed: childRemoved } = removeFromTree(
+              el.children,
+              targetId,
+            );
+            if (childRemoved) {
+              removed = true;
+              next.push({ ...(el as LayoutElement), children: ch } as Element);
+              continue;
+            }
+          }
+          next.push(el);
         }
-        next.push(el);
+        return { next, removed };
+      };
+
+      const { next, removed } = removeFromTree(elements, id);
+      if (!removed) return;
+
+      pushHistoryAndSet({
+        elements: next,
+        selectedElementId: selectedElementId === id ? null : selectedElementId,
+      });
+    },
+
+    moveElement: (id: string, newIndex: number, newParentId?: string) => {
+      const { elements } = get();
+      const elementIndex = elements.findIndex((el) => el.id === id);
+      if (elementIndex === -1) return;
+
+      const element = elements[elementIndex];
+      const newElements = [...elements];
+      newElements.splice(elementIndex, 1);
+      newElements.splice(newIndex, 0, { ...element, parentId: newParentId });
+
+      pushHistoryAndSet({
+        elements: newElements.map((el, i) => ({ ...el, order: i })),
+      });
+    },
+
+    duplicateElement: (id: string) => {
+      const { elements } = get();
+      const element = elements.find((el) => el.id === id);
+      if (!element) return;
+
+      const elementIndex = elements.findIndex((el) => el.id === id);
+      const newElement = remapSubtreeIds(
+        JSON.parse(JSON.stringify(element)) as Element,
+      );
+      newElement.order = elementIndex + 1;
+
+      const newElements = [
+        ...elements.slice(0, elementIndex + 1),
+        newElement,
+        ...elements.slice(elementIndex + 1),
+      ].map((el, i) => ({ ...el, order: i }));
+
+      pushHistoryAndSet({
+        elements: newElements,
+        selectedElementId: newElement.id,
+      });
+    },
+
+    undo: () => {
+      resetUpdateElementCoalesce();
+      const { past, future, elements, selectedElementId } = get();
+      if (past.length === 0) return;
+      const previous = past[past.length - 1];
+      const newPast = past.slice(0, -1);
+      const newFuture = [cloneElementsForHistory(elements), ...future].slice(
+        0,
+        MAX_UNDO,
+      );
+      const nextElements = cloneElementsForHistory(previous);
+      const nextSelected =
+        selectedElementId &&
+        elementIdExistsInTree(nextElements, selectedElementId)
+          ? selectedElementId
+          : null;
+      set({
+        elements: nextElements,
+        past: newPast,
+        future: newFuture,
+        selectedElementId: nextSelected,
+        hasUnsavedChanges: true,
+      });
+    },
+
+    redo: () => {
+      resetUpdateElementCoalesce();
+      const { past, future, elements, selectedElementId } = get();
+      if (future.length === 0) return;
+      const next = future[0];
+      const newFuture = future.slice(1);
+      const newPast = [...past, cloneElementsForHistory(elements)].slice(
+        -MAX_UNDO,
+      );
+      const nextElements = cloneElementsForHistory(next);
+      const nextSelected =
+        selectedElementId &&
+        elementIdExistsInTree(nextElements, selectedElementId)
+          ? selectedElementId
+          : null;
+      set({
+        elements: nextElements,
+        past: newPast,
+        future: newFuture,
+        selectedElementId: nextSelected,
+        hasUnsavedChanges: true,
+      });
+    },
+
+    selectElement: (id: string | null) => {
+      set({ selectedElementId: id });
+    },
+
+    setElements: (elements: Element[]) => {
+      pushHistoryAndSet({ elements });
+    },
+
+    publishSite: async () => {
+      const { site } = get();
+      if (!site) return;
+
+      try {
+        const response = await api.post(`/sites/${site.id}/publish`);
+        set({ site: response.data.data });
+      } catch (error) {
+        console.error("Failed to publish site:", error);
       }
-      return { next, removed };
-    };
+    },
 
-    const { next, removed } = removeFromTree(elements, id);
-    if (!removed) return;
+    unpublishSite: async () => {
+      const { site } = get();
+      if (!site) return;
 
-    set({
-      elements: next,
-      selectedElementId: selectedElementId === id ? null : selectedElementId,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  moveElement: (id: string, newIndex: number, newParentId?: string) => {
-    const { elements } = get();
-    const elementIndex = elements.findIndex((el) => el.id === id);
-    if (elementIndex === -1) return;
-
-    const element = elements[elementIndex];
-    const newElements = [...elements];
-    newElements.splice(elementIndex, 1);
-    newElements.splice(newIndex, 0, { ...element, parentId: newParentId });
-
-    set({
-      elements: newElements.map((el, i) => ({ ...el, order: i })),
-      hasUnsavedChanges: true,
-    });
-  },
-
-  duplicateElement: (id: string) => {
-    const { elements } = get();
-    const element = elements.find((el) => el.id === id);
-    if (!element) return;
-
-    const elementIndex = elements.findIndex((el) => el.id === id);
-    const newElement = remapSubtreeIds(
-      JSON.parse(JSON.stringify(element)) as Element,
-    );
-    newElement.order = elementIndex + 1;
-
-    const newElements = [
-      ...elements.slice(0, elementIndex + 1),
-      newElement,
-      ...elements.slice(elementIndex + 1),
-    ].map((el, i) => ({ ...el, order: i }));
-
-    set({
-      elements: newElements,
-      selectedElementId: newElement.id,
-      hasUnsavedChanges: true,
-    });
-  },
-
-  selectElement: (id: string | null) => {
-    set({ selectedElementId: id });
-  },
-
-  setElements: (elements: Element[]) => {
-    set({ elements, hasUnsavedChanges: true });
-  },
-
-  publishSite: async () => {
-    const { site } = get();
-    if (!site) return;
-
-    try {
-      const response = await api.post(`/sites/${site.id}/publish`);
-      set({ site: response.data.data });
-    } catch (error) {
-      console.error("Failed to publish site:", error);
-    }
-  },
-
-  unpublishSite: async () => {
-    const { site } = get();
-    if (!site) return;
-
-    try {
-      const response = await api.post(`/sites/${site.id}/unpublish`);
-      set({ site: response.data.data });
-    } catch (error) {
-      console.error("Failed to unpublish site:", error);
-    }
-  },
-}));
+      try {
+        const response = await api.post(`/sites/${site.id}/unpublish`);
+        set({ site: response.data.data });
+      } catch (error) {
+        console.error("Failed to unpublish site:", error);
+      }
+    },
+  };
+});
