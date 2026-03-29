@@ -1,9 +1,9 @@
-import { useDroppable } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useBuilderStore } from '@/stores/builderStore';
-import { ElementWrapper } from './ElementWrapper';
-import type { Element } from '@vera/shared';
+import { useBuilderStore } from "@/stores/builderStore";
+import { useDroppable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Element } from "@vera/shared";
+import { ElementWrapper } from "./ElementWrapper";
 
 interface SortableElementProps {
   element: Element;
@@ -20,7 +20,10 @@ function SortableElement({ element }: SortableElementProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: element.id });
+  } = useSortable({
+    id: element.id,
+    data: { type: "builder-element" },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -38,7 +41,7 @@ function SortableElement({ element }: SortableElementProps) {
         e.stopPropagation();
         selectElement(element.id);
       }}
-      className={`relative ${isSelected ? 'ring-2 ring-primary-500 ring-offset-2' : ''}`}
+      className={`relative ${isSelected ? "ring-2 ring-primary-500 ring-offset-2" : ""}`}
     >
       <ElementWrapper element={element} isSelected={isSelected} />
     </div>
@@ -49,7 +52,7 @@ export default function Canvas() {
   const { elements, selectElement } = useBuilderStore();
 
   const { setNodeRef, isOver } = useDroppable({
-    id: 'canvas',
+    id: "canvas",
   });
 
   const handleCanvasClick = () => {
@@ -62,7 +65,7 @@ export default function Canvas() {
       onClick={handleCanvasClick}
       className={`
         min-h-[calc(100vh-180px)] bg-white rounded-lg shadow-sm p-4
-        ${isOver ? 'ring-2 ring-primary-500 ring-dashed' : ''}
+        ${isOver ? "ring-2 ring-primary-500 ring-dashed" : ""}
       `}
     >
       {elements.length === 0 ? (
