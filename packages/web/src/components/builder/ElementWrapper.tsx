@@ -1,10 +1,18 @@
+import AlertBlock from "@/components/elements/AlertBlock";
+import BadgeBlock from "@/components/elements/BadgeBlock";
 import ButtonBlock from "@/components/elements/ButtonBlock";
+import CardBlock from "@/components/elements/CardBlock";
 import ColumnLayout from "@/components/elements/ColumnLayout";
+import ContainerLayout from "@/components/elements/ContainerLayout";
 import GridLayout from "@/components/elements/GridLayout";
 import ImageBlock from "@/components/elements/ImageBlock";
+import InputBlock from "@/components/elements/InputBlock";
+import SeparatorBlock from "@/components/elements/SeparatorBlock";
+import StackLayout from "@/components/elements/StackLayout";
 import TextBlock from "@/components/elements/TextBlock";
 import VideoBlock from "@/components/elements/VideoBlock";
 import type { Element } from "@vera/shared";
+import { useCallback } from "react";
 
 interface ElementWrapperProps {
   element: Element;
@@ -12,6 +20,13 @@ interface ElementWrapperProps {
 }
 
 export function ElementWrapper({ element, isSelected }: ElementWrapperProps) {
+  const renderNested = useCallback(
+    (child: Element, childSelected: boolean) => (
+      <ElementWrapper element={child} isSelected={childSelected} />
+    ),
+    [],
+  );
+
   const renderElement = () => {
     switch (element.type) {
       case "text":
@@ -22,10 +37,24 @@ export function ElementWrapper({ element, isSelected }: ElementWrapperProps) {
         return <VideoBlock element={element} />;
       case "button":
         return <ButtonBlock element={element} />;
+      case "card":
+        return <CardBlock element={element} />;
+      case "badge":
+        return <BadgeBlock element={element} />;
+      case "separator":
+        return <SeparatorBlock element={element} />;
+      case "alert":
+        return <AlertBlock element={element} />;
+      case "input":
+        return <InputBlock element={element} />;
       case "column":
-        return <ColumnLayout element={element} />;
+        return <ColumnLayout element={element} renderChild={renderNested} />;
       case "grid":
-        return <GridLayout element={element} />;
+        return <GridLayout element={element} renderChild={renderNested} />;
+      case "stack":
+        return <StackLayout element={element} renderChild={renderNested} />;
+      case "container":
+        return <ContainerLayout element={element} renderChild={renderNested} />;
       default:
         return (
           <div className="p-4 bg-builder-surface-muted text-builder-text-muted text-sm rounded-lg border border-builder-border">
