@@ -1,10 +1,19 @@
+import { Link } from 'react-router-dom';
 import type { Element } from '@vera/shared';
+
+interface PageInfo {
+  id: string;
+  slug: string;
+  name: string;
+}
 
 interface ElementRendererProps {
   element: Element;
+  siteSlug?: string;
+  pages?: PageInfo[];
 }
 
-export function ElementRenderer({ element }: ElementRendererProps) {
+export function ElementRenderer({ element, siteSlug, pages }: ElementRendererProps) {
   const renderElement = () => {
     switch (element.type) {
       case 'text':
@@ -14,11 +23,11 @@ export function ElementRenderer({ element }: ElementRendererProps) {
       case 'video':
         return <VideoPreview element={element} />;
       case 'button':
-        return <ButtonPreview element={element} />;
+        return <ButtonPreview element={element} siteSlug={siteSlug} pages={pages} />;
       case 'column':
-        return <ColumnPreview element={element} />;
+        return <ColumnPreview element={element} siteSlug={siteSlug} pages={pages} />;
       case 'grid':
-        return <GridPreview element={element} />;
+        return <GridPreview element={element} siteSlug={siteSlug} pages={pages} />;
       default:
         return null;
     }
@@ -141,7 +150,7 @@ function VideoPreview({ element }: { element: Element }) {
   );
 }
 
-function ButtonPreview({ element }: { element: Element }) {
+function ButtonPreview({ element, siteSlug, pages }: { element: Element; siteSlug?: string; pages?: PageInfo[] }) {
   if (element.type !== 'button') return null;
   const props = element.props;
 
@@ -169,6 +178,34 @@ function ButtonPreview({ element }: { element: Element }) {
     }
   };
 
+  const buttonClasses = `
+    inline-flex items-center justify-center font-medium
+    transition-all duration-200 hover:opacity-90
+    ${sizeClasses[props.size as keyof typeof sizeClasses]}
+    ${props.fullWidth ? 'w-full' : ''}
+  `;
+
+  // Handle internal page link
+  const linkType = props.linkType || 'external';
+  if (linkType === 'page' && props.pageId && siteSlug && pages) {
+    const targetPage = pages.find(p => p.id === props.pageId);
+    if (targetPage) {
+      const pagePath = `/s/${siteSlug}/${targetPage.slug}`;
+      return (
+        <div style={{ padding: paddingStyle }}>
+          <Link
+            to={pagePath}
+            style={getButtonStyles()}
+            className={buttonClasses}
+          >
+            {props.text}
+          </Link>
+        </div>
+      );
+    }
+  }
+
+  // External link
   return (
     <div style={{ padding: paddingStyle }}>
       <a
@@ -176,12 +213,7 @@ function ButtonPreview({ element }: { element: Element }) {
         target={props.openInNewTab ? '_blank' : undefined}
         rel={props.openInNewTab ? 'noopener noreferrer' : undefined}
         style={getButtonStyles()}
-        className={`
-          inline-flex items-center justify-center font-medium
-          transition-all duration-200 hover:opacity-90
-          ${sizeClasses[props.size as keyof typeof sizeClasses]}
-          ${props.fullWidth ? 'w-full' : ''}
-        `}
+        className={buttonClasses}
       >
         {props.text}
       </a>
@@ -189,7 +221,7 @@ function ButtonPreview({ element }: { element: Element }) {
   );
 }
 
-function ColumnPreview({ element }: { element: Element }) {
+function ColumnPreview({ element, siteSlug, pages }: { element: Element; siteSlug?: string; pages?: PageInfo[] }) {
   if (element.type !== 'column') return null;
   const props = element.props;
 
@@ -208,13 +240,13 @@ function ColumnPreview({ element }: { element: Element }) {
       }}
     >
       {element.children?.map((child) => (
-        <ElementRenderer key={child.id} element={child} />
+        <ElementRenderer key={child.id} element={child} siteSlug={siteSlug} pages={pages} />
       ))}
     </div>
   );
 }
 
-function GridPreview({ element }: { element: Element }) {
+function GridPreview({ element, siteSlug, pages }: { element: Element; siteSlug?: string; pages?: PageInfo[] }) {
   if (element.type !== 'grid') return null;
   const props = element.props;
 
@@ -233,7 +265,7 @@ function GridPreview({ element }: { element: Element }) {
       }}
     >
       {element.children?.map((child) => (
-        <ElementRenderer key={child.id} element={child} />
+        <ElementRenderer key={child.id} element={child} siteSlug={siteSlug} pages={pages} />
       ))}
     </div>
   );

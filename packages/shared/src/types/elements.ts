@@ -55,7 +55,9 @@ export interface ButtonElement extends BaseElement {
   type: 'button';
   props: {
     text: string;
+    linkType: 'external' | 'page';
     url: string;
+    pageId?: string;
     openInNewTab: boolean;
     variant: 'solid' | 'outline' | 'ghost';
     size: 'sm' | 'md' | 'lg';
@@ -133,7 +135,9 @@ export const DEFAULT_ELEMENT_PROPS: Record<ElementType, Partial<Element['props']
   },
   button: {
     text: 'Click me',
+    linkType: 'external',
     url: '#',
+    pageId: undefined,
     openInNewTab: false,
     variant: 'solid',
     size: 'md',
