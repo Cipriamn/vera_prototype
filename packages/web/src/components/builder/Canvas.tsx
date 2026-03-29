@@ -3,7 +3,27 @@ import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Element } from "@vera/shared";
+import { Fragment, useMemo } from "react";
 import { ElementWrapper } from "./ElementWrapper";
+
+function RootInsertGap({ insertIndex }: { insertIndex: number }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `root-gap:${insertIndex}`,
+    data: { type: "root-gap", insertIndex },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`
+        relative z-30 flex-shrink-0 min-h-[24px] -my-2 mx-0 rounded-md flex items-center justify-center
+        transition-colors pointer-events-auto
+        ${isOver ? "bg-primary-100 ring-2 ring-primary-400 ring-inset" : "bg-gray-50/80 hover:bg-gray-100/90"}
+      `}
+      aria-label={`Insert at position ${insertIndex + 1}`}
+    />
+  );
+}
 
 interface SortableElementProps {
   element: Element;
@@ -55,6 +75,14 @@ export default function Canvas() {
     id: "canvas",
   });
 
+  const roots = useMemo(
+    () =>
+      [...elements]
+        .filter((el) => !el.parentId)
+        .sort((a, b) => a.order - b.order),
+    [elements],
+  );
+
   const handleCanvasClick = () => {
     selectElement(null);
   };
@@ -68,7 +96,7 @@ export default function Canvas() {
         ${isOver ? "ring-2 ring-primary-500 ring-dashed" : ""}
       `}
     >
-      {elements.length === 0 ? (
+      {roots.length === 0 ? (
         <div className="h-full flex items-center justify-center text-gray-400">
           <div className="text-center">
             <svg
@@ -91,13 +119,14 @@ export default function Canvas() {
           </div>
         </div>
       ) : (
-        <div className="space-y-2">
-          {elements
-            .filter((el) => !el.parentId)
-            .sort((a, b) => a.order - b.order)
-            .map((element) => (
-              <SortableElement key={element.id} element={element} />
-            ))}
+        <div className="flex flex-col gap-0">
+          {roots.map((element, i) => (
+            <Fragment key={element.id}>
+              <RootInsertGap insertIndex={i} />
+              <SortableElement element={element} />
+            </Fragment>
+          ))}
+          <RootInsertGap insertIndex={roots.length} />
         </div>
       )}
     </div>
