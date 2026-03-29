@@ -1,4 +1,5 @@
-import type { VideoElement } from '@vera/shared';
+import { outerStyleFromPaddingAndBox } from "@/lib/outerStyles";
+import type { VideoElement } from "@vera/shared";
 
 interface VideoBlockProps {
   element: VideoElement;
@@ -9,7 +10,7 @@ function getVideoEmbedUrl(url: string): string | null {
 
   // YouTube
   const youtubeMatch = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
   );
   if (youtubeMatch) {
     return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
@@ -22,7 +23,7 @@ function getVideoEmbedUrl(url: string): string | null {
   }
 
   // If it's already an embed URL, return as-is
-  if (url.includes('embed') || url.includes('player')) {
+  if (url.includes("embed") || url.includes("player")) {
     return url;
   }
 
@@ -31,32 +32,30 @@ function getVideoEmbedUrl(url: string): string | null {
 
 function getAspectRatioClass(ratio: string): string {
   switch (ratio) {
-    case '16:9':
-      return 'aspect-video';
-    case '4:3':
-      return 'aspect-[4/3]';
-    case '1:1':
-      return 'aspect-square';
-    case '9:16':
-      return 'aspect-[9/16]';
+    case "16:9":
+      return "aspect-video";
+    case "4:3":
+      return "aspect-[4/3]";
+    case "1:1":
+      return "aspect-square";
+    case "9:16":
+      return "aspect-[9/16]";
     default:
-      return 'aspect-video';
+      return "aspect-video";
   }
 }
 
 export default function VideoBlock({ element }: VideoBlockProps) {
   const props = element.props;
 
-  const paddingStyle = props.padding
-    ? `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`
-    : '8px';
+  const outer = outerStyleFromPaddingAndBox(props.padding, props, "8px");
 
   const embedUrl = getVideoEmbedUrl(props.url);
 
   if (!props.url || !embedUrl) {
     return (
       <div
-        style={{ padding: paddingStyle }}
+        style={outer}
         className="flex items-center justify-center bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg"
       >
         <div className="text-center py-12 px-4">
@@ -80,19 +79,21 @@ export default function VideoBlock({ element }: VideoBlockProps) {
             />
           </svg>
           <p className="mt-2 text-sm text-gray-500">
-            {props.url ? 'Invalid video URL' : 'Add a YouTube or Vimeo URL in properties'}
+            {props.url
+              ? "Invalid video URL"
+              : "Add a YouTube or Vimeo URL in properties"}
           </p>
         </div>
       </div>
     );
   }
 
-  const autoplayParams = props.autoplay ? '&autoplay=1&mute=1' : '';
-  const controlsParams = props.controls ? '' : '&controls=0';
+  const autoplayParams = props.autoplay ? "&autoplay=1&mute=1" : "";
+  const controlsParams = props.controls ? "" : "&controls=0";
   const fullUrl = `${embedUrl}?${autoplayParams}${controlsParams}`;
 
   return (
-    <div style={{ padding: paddingStyle }}>
+    <div style={outer}>
       <div className={`${getAspectRatioClass(props.aspectRatio)} w-full`}>
         <iframe
           src={fullUrl}
