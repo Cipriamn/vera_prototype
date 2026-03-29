@@ -1,3 +1,4 @@
+import { outerStyleFromPaddingAndBox } from "@/lib/outerStyles";
 import { useBuilderStore } from "@/stores/builderStore";
 import type { TextElement } from "@vera/shared";
 import { useEffect, useLayoutEffect, useRef } from "react";
@@ -12,9 +13,6 @@ export default function TextBlock({ element, isEditing }: TextBlockProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const props = element.props;
 
-  // Never render props.content as React children on a contentEditable node — each
-  // store update reconciles the text node and resets the caret. Sync from props
-  // only when this element is not focused (e.g. edits from the property panel).
   useLayoutEffect(() => {
     const el = contentRef.current;
     if (!el) return;
@@ -39,9 +37,7 @@ export default function TextBlock({ element, isEditing }: TextBlockProps) {
     }
   };
 
-  const paddingStyle = props.padding
-    ? `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`
-    : "8px";
+  const outer = outerStyleFromPaddingAndBox(props.padding, props, "8px");
 
   const fontWeightMap: Record<string, number> = {
     normal: 400,
@@ -50,24 +46,36 @@ export default function TextBlock({ element, isEditing }: TextBlockProps) {
     bold: 700,
   };
 
+  const maxW =
+    props.maxWidth === "none" || props.maxWidth == null
+      ? undefined
+      : typeof props.maxWidth === "number"
+        ? `${props.maxWidth}px`
+        : undefined;
+
   return (
-    <div
-      ref={contentRef}
-      contentEditable={isEditing}
-      suppressContentEditableWarning
-      onInput={handleInput}
-      style={{
-        fontSize: `${props.fontSize}px`,
-        fontFamily: props.fontFamily,
-        fontWeight: fontWeightMap[props.fontWeight] || 400,
-        color: props.color,
-        textAlign: props.textAlign,
-        lineHeight: props.lineHeight,
-        padding: paddingStyle,
-        outline: "none",
-        minHeight: "24px",
-      }}
-      className={`${isEditing ? "cursor-text" : "cursor-pointer"}`}
-    />
+    <div style={outer}>
+      <div
+        ref={contentRef}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        style={{
+          fontSize: `${props.fontSize}px`,
+          fontFamily: props.fontFamily,
+          fontWeight: fontWeightMap[props.fontWeight] || 400,
+          color: props.color,
+          textAlign: props.textAlign,
+          lineHeight: props.lineHeight,
+          letterSpacing: `${props.letterSpacing ?? 0}px`,
+          textDecoration: props.textDecoration ?? "none",
+          textTransform: props.textTransform ?? "none",
+          maxWidth: maxW,
+          outline: "none",
+          minHeight: "24px",
+        }}
+        className={`${isEditing ? "cursor-text" : "cursor-pointer"}`}
+      />
+    </div>
   );
 }
