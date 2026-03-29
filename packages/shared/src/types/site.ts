@@ -1,4 +1,4 @@
-import type { Element } from './elements';
+import type { Element } from "./elements";
 
 export interface SiteSettings {
   primaryColor: string;
@@ -30,6 +30,8 @@ export interface Page {
   elements: Element[];
   isHomepage: boolean;
   order: number;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,15 +41,15 @@ export interface Template {
   name: string;
   description: string;
   thumbnail: string;
-  category: 'student-house' | 'sports-team' | 'event' | 'association';
-  pages: Omit<Page, 'id' | 'siteId' | 'createdAt' | 'updatedAt'>[];
+  category: "student-house" | "sports-team" | "event" | "association";
+  pages: Omit<Page, "id" | "siteId" | "createdAt" | "updatedAt">[];
   settings: SiteSettings;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  primaryColor: '#3b82f6',
-  secondaryColor: '#1f2937',
-  fontFamily: 'Inter',
+  primaryColor: "#3b82f6",
+  secondaryColor: "#1f2937",
+  fontFamily: "Inter",
 };
 
 export interface CreateSiteInput {
@@ -73,4 +75,6 @@ export interface UpdatePageInput {
   elements?: Element[];
   isHomepage?: boolean;
   order?: number;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
 }
