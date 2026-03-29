@@ -1,0 +1,64 @@
+import type { Element } from '@vera/shared';
+import TextBlock from '@/components/elements/TextBlock';
+import ImageBlock from '@/components/elements/ImageBlock';
+import VideoBlock from '@/components/elements/VideoBlock';
+import ButtonBlock from '@/components/elements/ButtonBlock';
+import ColumnLayout from '@/components/elements/ColumnLayout';
+import GridLayout from '@/components/elements/GridLayout';
+
+interface ElementWrapperProps {
+  element: Element;
+  isSelected: boolean;
+}
+
+export function ElementWrapper({ element, isSelected }: ElementWrapperProps) {
+  const renderElement = () => {
+    switch (element.type) {
+      case 'text':
+        return <TextBlock element={element} isEditing={isSelected} />;
+      case 'image':
+        return <ImageBlock element={element} />;
+      case 'video':
+        return <VideoBlock element={element} />;
+      case 'button':
+        return <ButtonBlock element={element} />;
+      case 'column':
+        return <ColumnLayout element={element} />;
+      case 'grid':
+        return <GridLayout element={element} />;
+      default:
+        return (
+          <div className="p-4 bg-gray-100 text-gray-500 text-sm">
+            Unknown element type
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="relative group">
+      {renderElement()}
+
+      {/* Selection indicator */}
+      {isSelected && (
+        <div className="absolute -top-2 -left-2 bg-primary-500 text-white text-xs px-2 py-0.5 rounded">
+          {element.type}
+        </div>
+      )}
+
+      {/* Hover controls */}
+      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex bg-white shadow-md rounded-md overflow-hidden">
+          <button
+            className="p-1 hover:bg-gray-100"
+            title="Move"
+          >
+            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

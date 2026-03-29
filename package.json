@@ -1,0 +1,21 @@
+{
+  "name": "vera-site-builder",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w packages/web",
+    "dev:server": "npm run dev -w packages/server",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:migrate": "npm run db:migrate -w packages/server",
+    "db:generate": "npm run db:generate -w packages/server",
+    "db:studio": "npm run db:studio -w packages/server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
