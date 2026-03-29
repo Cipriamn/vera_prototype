@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { api } from '@/utils/api';
-import type { Site, Page } from '@vera/shared';
-import { ElementRenderer } from '@/components/preview/ElementRenderer';
+import { ElementRenderer } from "@/components/preview/ElementRenderer";
+import { api } from "@/utils/api";
+import type { Page, Site } from "@vera/shared";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
 export default function Preview() {
-  const { siteSlug, pageSlug } = useParams<{ siteSlug: string; pageSlug?: string }>();
+  const { siteSlug, pageSlug } = useParams<{
+    siteSlug: string;
+    pageSlug?: string;
+  }>();
   const [site, setSite] = useState<Site | null>(null);
   const [page, setPage] = useState<Page | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,6 +17,28 @@ export default function Preview() {
   useEffect(() => {
     loadSite();
   }, [siteSlug, pageSlug]);
+
+  useEffect(() => {
+    if (!site || !page) return;
+    const title =
+      (page.metaTitle?.trim() || page.name) +
+      (site.name ? ` · ${site.name}` : "");
+    document.title = title;
+
+    const desc = page.metaDescription?.trim();
+    let meta: HTMLMetaElement | null = null;
+    if (desc) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content = desc;
+      document.head.appendChild(meta);
+    }
+
+    return () => {
+      document.title = "Vera Site Builder";
+      meta?.remove();
+    };
+  }, [site, page]);
 
   const loadSite = async () => {
     if (!siteSlug) return;
@@ -31,7 +56,7 @@ export default function Preview() {
       setSite(data.site);
       setPage(data.page);
     } catch (err) {
-      setError('Site not found or not published');
+      setError("Site not found or not published");
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +74,11 @@ export default function Preview() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Site Not Found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Site Not Found
+          </h1>
           <p className="text-gray-600 mb-4">
-            {error || 'This site does not exist or is not published.'}
+            {error || "This site does not exist or is not published."}
           </p>
           <Link to="/" className="text-primary-600 hover:underline">
             Go to homepage
@@ -64,18 +91,23 @@ export default function Preview() {
   return (
     <div
       className="min-h-screen"
-      style={{
-        fontFamily: site.settings?.fontFamily || 'Inter, sans-serif',
-        '--primary-color': site.settings?.primaryColor || '#3b82f6',
-        '--secondary-color': site.settings?.secondaryColor || '#1f2937',
-      } as React.CSSProperties}
+      style={
+        {
+          fontFamily: site.settings?.fontFamily || "Inter, sans-serif",
+          "--primary-color": site.settings?.primaryColor || "#3b82f6",
+          "--secondary-color": site.settings?.secondaryColor || "#1f2937",
+        } as React.CSSProperties
+      }
     >
       {/* Navigation for multi-page sites */}
       {site.pages && site.pages.length > 1 && (
         <nav className="bg-white shadow-sm">
           <div className="max-w-6xl mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
-              <Link to={`/s/${siteSlug}`} className="font-semibold text-gray-900">
+              <Link
+                to={`/s/${siteSlug}`}
+                className="font-semibold text-gray-900"
+              >
                 {site.name}
               </Link>
               <div className="flex gap-4">
@@ -85,8 +117,8 @@ export default function Preview() {
                     to={`/s/${siteSlug}/${p.slug}`}
                     className={`text-sm ${
                       p.id === page.id
-                        ? 'text-primary-600 font-medium'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? "text-primary-600 font-medium"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
                     {p.name}
