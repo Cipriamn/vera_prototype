@@ -171,8 +171,8 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 md:gap-3 shrink-0">
-          <span className="text-xs text-builder-text-muted hidden lg:inline pr-0.5">
+        <div className="flex flex-nowrap items-center gap-2.5 md:gap-3 shrink-0">
+          <span className="text-xs text-builder-text-muted hidden lg:inline pr-0.5 shrink-0">
             Pages
           </span>
           {site?.pages && site.pages.length > 0 && (
@@ -195,11 +195,11 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             type="button"
             onClick={() => setShowPageSettingsModal(true)}
             disabled={!currentPage}
-            className="flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] text-sm text-builder-text border border-builder-border rounded-lg hover:bg-builder-surface-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] shrink-0 whitespace-nowrap text-sm text-builder-text border border-builder-border rounded-lg hover:bg-builder-surface-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Page name, URL, SEO, delete"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -217,16 +217,18 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            <span className="hidden sm:inline">Page settings</span>
+            <span className="hidden sm:inline whitespace-nowrap">
+              Page settings
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setShowNewPageModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/35 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] shrink-0 whitespace-nowrap text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/35 rounded-lg transition-colors"
             title="Add new page"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -238,11 +240,11 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span>New Page</span>
+            <span className="whitespace-nowrap">New Page</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2.5 md:gap-3 shrink-0">
+        <div className="flex flex-nowrap items-center gap-2.5 md:gap-3 shrink-0">
           <button
             type="button"
             onClick={onToggleTheme}
