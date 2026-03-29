@@ -44,6 +44,18 @@ function layoutIdFromSlotDroppableId(id: string): string | null {
     if (i === -1) return null;
     return rest.slice(0, i);
   }
+  if (id.startsWith("stack-gap:")) {
+    const rest = id.slice("stack-gap:".length);
+    const i = rest.lastIndexOf(":");
+    if (i === -1) return null;
+    return rest.slice(0, i);
+  }
+  if (id.startsWith("container-gap:")) {
+    const rest = id.slice("container-gap:".length);
+    const i = rest.lastIndexOf(":");
+    if (i === -1) return null;
+    return rest.slice(0, i);
+  }
   return null;
 }
 
@@ -82,7 +94,12 @@ const layoutSlotCollisionDetection: CollisionDetection = (args) => {
   const pointerHits = pointerWithin(args);
   const slotHit = pointerHits.find((c) => {
     const s = String(c.id);
-    return s.startsWith("grid-cell:") || s.startsWith("column-cell:");
+    return (
+      s.startsWith("grid-cell:") ||
+      s.startsWith("column-cell:") ||
+      s.startsWith("stack-gap:") ||
+      s.startsWith("container-gap:")
+    );
   });
 
   if (slotHit) {
@@ -91,7 +108,10 @@ const layoutSlotCollisionDetection: CollisionDetection = (args) => {
     const slotLayoutId = layoutIdFromSlotDroppableId(String(slotHit.id));
 
     const centerTargetsSlot =
-      topId.startsWith("grid-cell:") || topId.startsWith("column-cell:");
+      topId.startsWith("grid-cell:") ||
+      topId.startsWith("column-cell:") ||
+      topId.startsWith("stack-gap:") ||
+      topId.startsWith("container-gap:");
     const centerOnLayoutThatOwnsSlot =
       slotLayoutId != null && topId === slotLayoutId;
 
@@ -132,6 +152,8 @@ export default function Builder() {
     addElement,
     addGridChild,
     addColumnChild,
+    addFlowChild,
+    moveElementToFlowSlot,
     moveElementToGridCell,
     moveElementToColumnSlot,
     moveElementToRoot,
@@ -227,6 +249,26 @@ export default function Builder() {
           return;
         }
 
+        if (overData?.type === "stack-gap") {
+          addFlowChild(
+            overData.stackId as string,
+            "stack",
+            overData.insertIndex as number,
+            elementType,
+          );
+          return;
+        }
+
+        if (overData?.type === "container-gap") {
+          addFlowChild(
+            overData.containerId as string,
+            "container",
+            overData.insertIndex as number,
+            elementType,
+          );
+          return;
+        }
+
         if (overData?.type === "root-gap") {
           addElement(elementType, overData.insertIndex as number, undefined);
           return;
@@ -277,6 +319,29 @@ export default function Builder() {
         return;
       }
 
+      if (over.data.current?.type === "stack-gap") {
+        const { stackId, insertIndex } = over.data.current as {
+          stackId: string;
+          insertIndex: number;
+        };
+        moveElementToFlowSlot(activeIdStr, stackId, "stack", insertIndex);
+        return;
+      }
+
+      if (over.data.current?.type === "container-gap") {
+        const { containerId, insertIndex } = over.data.current as {
+          containerId: string;
+          insertIndex: number;
+        };
+        moveElementToFlowSlot(
+          activeIdStr,
+          containerId,
+          "container",
+          insertIndex,
+        );
+        return;
+      }
+
       const sortedRoots = [...elements]
         .filter((el) => !el.parentId)
         .sort((a, b) => a.order - b.order);
@@ -311,6 +376,8 @@ export default function Builder() {
       addElement,
       addGridChild,
       addColumnChild,
+      addFlowChild,
+      moveElementToFlowSlot,
       moveElementToGridCell,
       moveElementToColumnSlot,
       moveElementToRoot,
