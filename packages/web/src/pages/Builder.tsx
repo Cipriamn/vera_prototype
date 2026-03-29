@@ -2,6 +2,8 @@ import Canvas from "@/components/builder/Canvas";
 import PropertyPanel from "@/components/builder/PropertyPanel";
 import Sidebar from "@/components/builder/Sidebar";
 import Toolbar from "@/components/builder/Toolbar";
+import { useBuilderTheme } from "@/hooks/useBuilderTheme";
+import { cn } from "@/lib/utils";
 import { useBuilderStore } from "@/stores/builderStore";
 import {
   closestCenter,
@@ -135,6 +137,8 @@ export default function Builder() {
     moveElementToRoot,
     setElements,
   } = useBuilderStore();
+
+  const { theme, toggleTheme } = useBuilderTheme();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeType, setActiveType] = useState<ElementType | null>(null);
@@ -325,10 +329,15 @@ export default function Builder() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div
+        className={cn(
+          "min-h-screen flex items-center justify-center bg-builder-app text-builder-text",
+          theme === "dark" && "dark",
+        )}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading builder...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-builder-border border-t-primary-600 dark:border-t-primary-400 mx-auto" />
+          <p className="mt-4 text-builder-text-muted">Loading builder...</p>
         </div>
       </div>
     );
@@ -336,12 +345,17 @@ export default function Builder() {
 
   if (!site) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div
+        className={cn(
+          "min-h-screen flex items-center justify-center bg-builder-app text-builder-text",
+          theme === "dark" && "dark",
+        )}
+      >
         <div className="text-center">
-          <p className="text-gray-600">Site not found</p>
+          <p className="text-builder-text-muted">Site not found</p>
           <Link
             to="/dashboard"
-            className="text-primary-600 hover:underline mt-2 inline-block"
+            className="text-primary-600 dark:text-primary-400 hover:underline mt-2 inline-block"
           >
             Back to Dashboard
           </Link>
@@ -362,17 +376,18 @@ export default function Builder() {
       onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
-      <div className="h-screen flex flex-col bg-gray-100">
-        {/* Toolbar */}
-        <Toolbar />
+      <div
+        className={cn(
+          "h-screen flex flex-col bg-builder-app text-builder-text",
+          theme === "dark" && "dark",
+        )}
+      >
+        <Toolbar theme={theme} onToggleTheme={toggleTheme} />
 
-        {/* Main builder area */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left sidebar - Elements palette */}
+        <div className="flex-1 flex overflow-hidden min-h-0">
           <Sidebar />
 
-          {/* Canvas */}
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-auto p-4 md:p-6 bg-builder-app">
             <SortableContext
               items={sortableRootIds}
               strategy={verticalListSortingStrategy}
@@ -387,19 +402,25 @@ export default function Builder() {
       </div>
 
       {/* Drag overlay */}
-      <DragOverlay>
-        {activeId && activeType && (
-          <div className="bg-white border-2 border-primary-500 rounded-lg p-4 shadow-lg opacity-80">
-            <span className="text-sm font-medium capitalize">{activeType}</span>
+      <DragOverlay dropAnimation={null}>
+        {activeId && activeType ? (
+          <div className={cn(theme === "dark" && "dark")}>
+            <div className="rounded-xl border-2 border-primary-500 dark:border-primary-400 bg-builder-surface/95 backdrop-blur-md px-4 py-3 shadow-builder-canvas dark:shadow-builder-canvas-dark opacity-90">
+              <span className="text-sm font-medium font-display capitalize text-builder-text">
+                {activeType}
+              </span>
+            </div>
           </div>
-        )}
-        {existingDragOverlayType && (
-          <div className="bg-white border-2 border-primary-500 rounded-lg p-4 shadow-lg opacity-80">
-            <span className="text-sm font-medium capitalize">
-              {existingDragOverlayType}
-            </span>
+        ) : null}
+        {existingDragOverlayType && !activeType ? (
+          <div className={cn(theme === "dark" && "dark")}>
+            <div className="rounded-xl border-2 border-primary-500 dark:border-primary-400 bg-builder-surface/95 backdrop-blur-md px-4 py-3 shadow-builder-canvas dark:shadow-builder-canvas-dark opacity-90">
+              <span className="text-sm font-medium font-display capitalize text-builder-text">
+                {existingDragOverlayType}
+              </span>
+            </div>
           </div>
-        )}
+        ) : null}
       </DragOverlay>
     </DndContext>
   );
