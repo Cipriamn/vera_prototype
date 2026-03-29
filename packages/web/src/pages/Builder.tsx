@@ -160,6 +160,67 @@ export default function Builder() {
     setElements,
   } = useBuilderStore();
 
+  useEffect(() => {
+    if (!site || !pageId) return;
+
+    const isTypingContext = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      return Boolean(
+        target.closest("input, textarea, select, [contenteditable='true']"),
+      );
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+
+      if (mod && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        const { savePage, hasUnsavedChanges, isSaving, currentPage } =
+          useBuilderStore.getState();
+        if (currentPage && hasUnsavedChanges && !isSaving) {
+          void savePage();
+        }
+        return;
+      }
+
+      if (isTypingContext(e.target)) return;
+
+      if (mod && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) useBuilderStore.getState().redo();
+        else useBuilderStore.getState().undo();
+        return;
+      }
+
+      if (mod && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        useBuilderStore.getState().redo();
+        return;
+      }
+
+      if (
+        e.key === "Insert" ||
+        (mod && e.shiftKey && e.key.toLowerCase() === "a")
+      ) {
+        e.preventDefault();
+        useBuilderStore.getState().addElement("text");
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        const { selectedElementId, deleteElement } = useBuilderStore.getState();
+        if (selectedElementId) {
+          e.preventDefault();
+          deleteElement(selectedElementId);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [site, pageId]);
+
   const { theme, toggleTheme } = useBuilderTheme();
 
   const [activeId, setActiveId] = useState<string | null>(null);
