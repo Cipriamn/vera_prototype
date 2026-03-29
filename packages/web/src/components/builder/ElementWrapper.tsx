@@ -1,10 +1,10 @@
-import type { Element } from '@vera/shared';
-import TextBlock from '@/components/elements/TextBlock';
-import ImageBlock from '@/components/elements/ImageBlock';
-import VideoBlock from '@/components/elements/VideoBlock';
-import ButtonBlock from '@/components/elements/ButtonBlock';
-import ColumnLayout from '@/components/elements/ColumnLayout';
-import GridLayout from '@/components/elements/GridLayout';
+import ButtonBlock from "@/components/elements/ButtonBlock";
+import ColumnLayout from "@/components/elements/ColumnLayout";
+import GridLayout from "@/components/elements/GridLayout";
+import ImageBlock from "@/components/elements/ImageBlock";
+import TextBlock from "@/components/elements/TextBlock";
+import VideoBlock from "@/components/elements/VideoBlock";
+import type { Element } from "@vera/shared";
 
 interface ElementWrapperProps {
   element: Element;
@@ -14,21 +14,21 @@ interface ElementWrapperProps {
 export function ElementWrapper({ element, isSelected }: ElementWrapperProps) {
   const renderElement = () => {
     switch (element.type) {
-      case 'text':
+      case "text":
         return <TextBlock element={element} isEditing={isSelected} />;
-      case 'image':
+      case "image":
         return <ImageBlock element={element} />;
-      case 'video':
+      case "video":
         return <VideoBlock element={element} />;
-      case 'button':
+      case "button":
         return <ButtonBlock element={element} />;
-      case 'column':
+      case "column":
         return <ColumnLayout element={element} />;
-      case 'grid':
+      case "grid":
         return <GridLayout element={element} />;
       default:
         return (
-          <div className="p-4 bg-gray-100 text-gray-500 text-sm">
+          <div className="p-4 bg-builder-surface-muted text-builder-text-muted text-sm rounded-lg border border-builder-border">
             Unknown element type
           </div>
         );
@@ -39,22 +39,31 @@ export function ElementWrapper({ element, isSelected }: ElementWrapperProps) {
     <div className="relative group">
       {renderElement()}
 
-      {/* Selection indicator */}
       {isSelected && (
-        <div className="absolute -top-2 -left-2 bg-primary-500 text-white text-xs px-2 py-0.5 rounded">
+        <div className="absolute -top-2 -left-2 z-10 rounded-md bg-primary-600 dark:bg-primary-500 px-2 py-0.5 text-[10px] font-semibold font-display uppercase tracking-wide text-white shadow-sm">
           {element.type}
         </div>
       )}
 
-      {/* Hover controls */}
-      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="flex bg-white shadow-md rounded-md overflow-hidden">
+      <div className="absolute top-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="flex rounded-lg border border-builder-border bg-builder-surface shadow-md overflow-hidden pointer-events-auto">
           <button
-            className="p-1 hover:bg-gray-100"
-            title="Move"
+            type="button"
+            className="p-1.5 hover:bg-builder-surface-muted text-builder-text-muted"
+            title="Drag handle"
           >
-            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 8h16M4 16h16"
+              />
             </svg>
           </button>
         </div>
