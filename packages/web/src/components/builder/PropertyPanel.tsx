@@ -1,16 +1,30 @@
-import { useBuilderStore } from '@/stores/builderStore';
-import type { Element } from '@vera/shared';
+import { useBuilderStore } from "@/stores/builderStore";
+import type { Element } from "@vera/shared";
+import { isLayoutElement } from "@vera/shared";
+
+function findElementDeep(list: Element[], id: string): Element | undefined {
+  for (const el of list) {
+    if (el.id === id) return el;
+    if (isLayoutElement(el) && el.children?.length) {
+      const found = findElementDeep(el.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
 
 function TextProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'text') return null;
+  if (element.type !== "text") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Content</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Content
+        </label>
         <textarea
           value={props.content}
           onChange={(e) =>
@@ -25,7 +39,9 @@ function TextProperties({ element }: { element: Element }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Font Size</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Font Size
+          </label>
           <input
             type="number"
             value={props.fontSize}
@@ -40,7 +56,9 @@ function TextProperties({ element }: { element: Element }) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Color
+          </label>
           <input
             type="color"
             value={props.color}
@@ -55,7 +73,9 @@ function TextProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Font Weight</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Font Weight
+        </label>
         <select
           value={props.fontWeight}
           onChange={(e) =>
@@ -73,9 +93,11 @@ function TextProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Text Align</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Text Align
+        </label>
         <div className="flex gap-1">
-          {(['left', 'center', 'right', 'justify'] as const).map((align) => (
+          {(["left", "center", "right", "justify"] as const).map((align) => (
             <button
               key={align}
               onClick={() =>
@@ -85,8 +107,8 @@ function TextProperties({ element }: { element: Element }) {
               }
               className={`flex-1 py-1.5 text-xs border rounded ${
                 props.textAlign === align
-                  ? 'bg-primary-100 border-primary-300 text-primary-700'
-                  : 'border-gray-200 hover:bg-gray-50'
+                  ? "bg-primary-100 border-primary-300 text-primary-700"
+                  : "border-gray-200 hover:bg-gray-50"
               }`}
             >
               {align.charAt(0).toUpperCase() + align.slice(1)}
@@ -101,13 +123,15 @@ function TextProperties({ element }: { element: Element }) {
 function ImageProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'image') return null;
+  if (element.type !== "image") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Image URL</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Image URL
+        </label>
         <input
           type="text"
           value={props.src}
@@ -122,7 +146,9 @@ function ImageProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Alt Text</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Alt Text
+        </label>
         <input
           type="text"
           value={props.alt}
@@ -137,12 +163,21 @@ function ImageProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Object Fit</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Object Fit
+        </label>
         <select
           value={props.objectFit}
           onChange={(e) =>
             updateElement(element.id, {
-              props: { ...props, objectFit: e.target.value as 'cover' | 'contain' | 'fill' | 'none' },
+              props: {
+                ...props,
+                objectFit: e.target.value as
+                  | "cover"
+                  | "contain"
+                  | "fill"
+                  | "none",
+              },
             })
           }
           className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
@@ -155,7 +190,9 @@ function ImageProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Border Radius</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Border Radius
+        </label>
         <input
           type="number"
           value={props.borderRadius}
@@ -176,13 +213,15 @@ function ImageProperties({ element }: { element: Element }) {
 function VideoProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'video') return null;
+  if (element.type !== "video") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Video URL</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Video URL
+        </label>
         <input
           type="text"
           value={props.url}
@@ -197,12 +236,17 @@ function VideoProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Aspect Ratio</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Aspect Ratio
+        </label>
         <select
           value={props.aspectRatio}
           onChange={(e) =>
             updateElement(element.id, {
-              props: { ...props, aspectRatio: e.target.value as '16:9' | '4:3' | '1:1' | '9:16' },
+              props: {
+                ...props,
+                aspectRatio: e.target.value as "16:9" | "4:3" | "1:1" | "9:16",
+              },
             })
           }
           className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
@@ -250,13 +294,15 @@ function VideoProperties({ element }: { element: Element }) {
 function ButtonProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'button') return null;
+  if (element.type !== "button") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Button Text</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Button Text
+        </label>
         <input
           type="text"
           value={props.text}
@@ -270,7 +316,9 @@ function ButtonProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Link URL</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Link URL
+        </label>
         <input
           type="text"
           value={props.url}
@@ -286,7 +334,9 @@ function ButtonProperties({ element }: { element: Element }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Background</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Background
+          </label>
           <input
             type="color"
             value={props.backgroundColor}
@@ -299,7 +349,9 @@ function ButtonProperties({ element }: { element: Element }) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Text Color</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Text Color
+          </label>
           <input
             type="color"
             value={props.textColor}
@@ -314,12 +366,17 @@ function ButtonProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Variant</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Variant
+        </label>
         <select
           value={props.variant}
           onChange={(e) =>
             updateElement(element.id, {
-              props: { ...props, variant: e.target.value as 'solid' | 'outline' | 'ghost' },
+              props: {
+                ...props,
+                variant: e.target.value as "solid" | "outline" | "ghost",
+              },
             })
           }
           className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
@@ -331,9 +388,11 @@ function ButtonProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Size</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Size
+        </label>
         <div className="flex gap-1">
-          {(['sm', 'md', 'lg'] as const).map((size) => (
+          {(["sm", "md", "lg"] as const).map((size) => (
             <button
               key={size}
               onClick={() =>
@@ -343,8 +402,8 @@ function ButtonProperties({ element }: { element: Element }) {
               }
               className={`flex-1 py-1.5 text-xs border rounded uppercase ${
                 props.size === size
-                  ? 'bg-primary-100 border-primary-300 text-primary-700'
-                  : 'border-gray-200 hover:bg-gray-50'
+                  ? "bg-primary-100 border-primary-300 text-primary-700"
+                  : "border-gray-200 hover:bg-gray-50"
               }`}
             >
               {size}
@@ -387,13 +446,15 @@ function ButtonProperties({ element }: { element: Element }) {
 function ColumnProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'column') return null;
+  if (element.type !== "column") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Columns</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Columns
+        </label>
         <div className="flex gap-1">
           {([2, 3, 4] as const).map((cols) => (
             <button
@@ -405,8 +466,8 @@ function ColumnProperties({ element }: { element: Element }) {
               }
               className={`flex-1 py-1.5 text-xs border rounded ${
                 props.columns === cols
-                  ? 'bg-primary-100 border-primary-300 text-primary-700'
-                  : 'border-gray-200 hover:bg-gray-50'
+                  ? "bg-primary-100 border-primary-300 text-primary-700"
+                  : "border-gray-200 hover:bg-gray-50"
               }`}
             >
               {cols} cols
@@ -416,7 +477,9 @@ function ColumnProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Gap (px)</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Gap (px)
+        </label>
         <input
           type="number"
           value={props.gap}
@@ -432,10 +495,16 @@ function ColumnProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Background</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Background
+        </label>
         <input
           type="color"
-          value={props.backgroundColor === 'transparent' ? '#ffffff' : props.backgroundColor}
+          value={
+            props.backgroundColor === "transparent"
+              ? "#ffffff"
+              : props.backgroundColor
+          }
           onChange={(e) =>
             updateElement(element.id, {
               props: { ...props, backgroundColor: e.target.value },
@@ -451,14 +520,16 @@ function ColumnProperties({ element }: { element: Element }) {
 function GridProperties({ element }: { element: Element }) {
   const { updateElement } = useBuilderStore();
 
-  if (element.type !== 'grid') return null;
+  if (element.type !== "grid") return null;
   const props = element.props;
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Columns</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Columns
+          </label>
           <input
             type="number"
             value={props.columns}
@@ -473,7 +544,9 @@ function GridProperties({ element }: { element: Element }) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Rows</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Rows
+          </label>
           <input
             type="number"
             value={props.rows}
@@ -490,7 +563,9 @@ function GridProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Gap (px)</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Gap (px)
+        </label>
         <input
           type="number"
           value={props.gap}
@@ -506,10 +581,16 @@ function GridProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Background</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Background
+        </label>
         <input
           type="color"
-          value={props.backgroundColor === 'transparent' ? '#ffffff' : props.backgroundColor}
+          value={
+            props.backgroundColor === "transparent"
+              ? "#ffffff"
+              : props.backgroundColor
+          }
           onChange={(e) =>
             updateElement(element.id, {
               props: { ...props, backgroundColor: e.target.value },
@@ -523,8 +604,11 @@ function GridProperties({ element }: { element: Element }) {
 }
 
 export default function PropertyPanel() {
-  const { elements, selectedElementId, deleteElement, duplicateElement } = useBuilderStore();
-  const selectedElement = elements.find((el) => el.id === selectedElementId);
+  const { elements, selectedElementId, deleteElement, duplicateElement } =
+    useBuilderStore();
+  const selectedElement = selectedElementId
+    ? findElementDeep(elements, selectedElementId)
+    : undefined;
 
   if (!selectedElement) {
     return (
@@ -543,7 +627,9 @@ export default function PropertyPanel() {
               d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
             />
           </svg>
-          <p className="mt-4 text-sm">Select an element to edit its properties</p>
+          <p className="mt-4 text-sm">
+            Select an element to edit its properties
+          </p>
         </div>
       </div>
     );
@@ -576,12 +662,24 @@ export default function PropertyPanel() {
       </div>
 
       <div className="p-4">
-        {selectedElement.type === 'text' && <TextProperties element={selectedElement} />}
-        {selectedElement.type === 'image' && <ImageProperties element={selectedElement} />}
-        {selectedElement.type === 'video' && <VideoProperties element={selectedElement} />}
-        {selectedElement.type === 'button' && <ButtonProperties element={selectedElement} />}
-        {selectedElement.type === 'column' && <ColumnProperties element={selectedElement} />}
-        {selectedElement.type === 'grid' && <GridProperties element={selectedElement} />}
+        {selectedElement.type === "text" && (
+          <TextProperties element={selectedElement} />
+        )}
+        {selectedElement.type === "image" && (
+          <ImageProperties element={selectedElement} />
+        )}
+        {selectedElement.type === "video" && (
+          <VideoProperties element={selectedElement} />
+        )}
+        {selectedElement.type === "button" && (
+          <ButtonProperties element={selectedElement} />
+        )}
+        {selectedElement.type === "column" && (
+          <ColumnProperties element={selectedElement} />
+        )}
+        {selectedElement.type === "grid" && (
+          <GridProperties element={selectedElement} />
+        )}
       </div>
     </div>
   );
