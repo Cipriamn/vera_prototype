@@ -1,12 +1,18 @@
 import { useBuilderStore } from "@/stores/builderStore";
-import { useDroppable } from "@dnd-kit/core";
+import { useDndContext, useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Element } from "@vera/shared";
 import { Fragment, useMemo } from "react";
 import { ElementWrapper } from "./ElementWrapper";
 
+/** Fixed height always so layout does not reflow when a drag starts (avoids cursor vs overlay offset). */
+const ROOT_GAP_PX = 24;
+
 function RootInsertGap({ insertIndex }: { insertIndex: number }) {
+  const { active } = useDndContext();
+  const isDragging = active != null;
+
   const { setNodeRef, isOver } = useDroppable({
     id: `root-gap:${insertIndex}`,
     data: { type: "root-gap", insertIndex },
@@ -15,16 +21,23 @@ function RootInsertGap({ insertIndex }: { insertIndex: number }) {
   return (
     <div
       ref={setNodeRef}
+      style={{ height: ROOT_GAP_PX, minHeight: ROOT_GAP_PX }}
       className={`
-        relative z-30 flex-shrink-0 min-h-[24px] -my-2 mx-0 rounded-lg flex items-center justify-center
-        transition-colors pointer-events-auto
+        relative z-10 w-full shrink-0 rounded-md flex items-center justify-center
+        transition-[background-color,border-color,box-shadow] duration-150
+        border border-dashed
         ${
-          isOver
-            ? "bg-primary-100 dark:bg-primary-900/50 ring-2 ring-primary-400 dark:ring-primary-500 ring-inset"
-            : "bg-builder-app/80 hover:bg-builder-surface-muted/80"
+          !isDragging
+            ? "pointer-events-none border-transparent bg-transparent"
+            : isOver
+              ? "pointer-events-auto bg-primary-100/90 dark:bg-primary-900/50 border-primary-400/70 dark:border-primary-500/60"
+              : "pointer-events-auto border-transparent bg-builder-app/50 dark:bg-builder-surface-muted/30"
         }
       `}
-      aria-label={`Insert at position ${insertIndex + 1}`}
+      aria-hidden={!isDragging}
+      aria-label={
+        isDragging ? `Insert at position ${insertIndex + 1}` : undefined
+      }
     />
   );
 }
