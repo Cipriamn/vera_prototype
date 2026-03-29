@@ -15,6 +15,7 @@ import {
   pointerWithin,
   useSensor,
   useSensors,
+  type Collision,
   type CollisionDetection,
 } from "@dnd-kit/core";
 import {
@@ -25,19 +26,82 @@ import {
 } from "@dnd-kit/sortable";
 import type { Element, ElementType } from "@vera/shared";
 import { isLayoutElement } from "@vera/shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+function layoutIdFromSlotDroppableId(id: string): string | null {
+  if (id.startsWith("grid-cell:")) {
+    const rest = id.slice("grid-cell:".length);
+    const i = rest.lastIndexOf(":");
+    if (i === -1) return null;
+    return rest.slice(0, i);
+  }
+  if (id.startsWith("column-cell:")) {
+    const rest = id.slice("column-cell:".length);
+    const i = rest.lastIndexOf(":");
+    if (i === -1) return null;
+    return rest.slice(0, i);
+  }
+  return null;
+}
+
+function pickNearestRootGapCollision(
+  args: Parameters<CollisionDetection>[0],
+): Collision | undefined {
+  const pointerHits = pointerWithin(args);
+  const gaps = pointerHits.filter((c) => String(c.id).startsWith("root-gap:"));
+  if (gaps.length === 0) return undefined;
+  if (gaps.length === 1) return gaps[0];
+  const coords = args.pointerCoordinates;
+  if (!coords) return gaps[0];
+  let best = gaps[0];
+  let bestDist = Infinity;
+  for (const g of gaps) {
+    const rect = args.droppableRects.get(g.id);
+    if (!rect) continue;
+    const cy = rect.top + rect.height / 2;
+    const dist = Math.abs(coords.y - cy);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = g;
+    }
+  }
+  return best;
+}
+
+/** Root insert strips first; then grid/column only when center targets that slot/layout. */
 const layoutSlotCollisionDetection: CollisionDetection = (args) => {
+  const rootGap = pickNearestRootGapCollision(args);
+  if (rootGap) {
+    return [rootGap];
+  }
+
+  const centerCollisions = closestCenter(args);
   const pointerHits = pointerWithin(args);
   const slotHit = pointerHits.find((c) => {
     const s = String(c.id);
     return s.startsWith("grid-cell:") || s.startsWith("column-cell:");
   });
+
   if (slotHit) {
-    return [slotHit];
+    const top = centerCollisions[0];
+    const topId = top ? String(top.id) : "";
+    const slotLayoutId = layoutIdFromSlotDroppableId(String(slotHit.id));
+
+    const centerTargetsSlot =
+      topId.startsWith("grid-cell:") || topId.startsWith("column-cell:");
+    const centerOnLayoutThatOwnsSlot =
+      slotLayoutId != null && topId === slotLayoutId;
+
+    if (centerTargetsSlot || centerOnLayoutThatOwnsSlot) {
+      return [slotHit];
+    }
   }
-  return closestCenter(args);
+
+  if (centerCollisions.length > 0) {
+    return centerCollisions;
+  }
+  return slotHit ? [slotHit] : [];
 };
 
 function findElementTypeInTree(
@@ -159,6 +223,11 @@ export default function Builder() {
           return;
         }
 
+        if (overData?.type === "root-gap") {
+          addElement(elementType, overData.insertIndex as number, undefined);
+          return;
+        }
+
         const overId = over.id as string;
 
         // Determine insert position
@@ -179,6 +248,12 @@ export default function Builder() {
       }
 
       const activeIdStr = active.id as string;
+
+      if (over.data.current?.type === "root-gap") {
+        const insertIndex = over.data.current.insertIndex as number;
+        moveElementToRoot(activeIdStr, insertIndex);
+        return;
+      }
 
       if (over.data.current?.type === "grid-cell") {
         const { gridId, cellIndex } = over.data.current as {
@@ -239,6 +314,15 @@ export default function Builder() {
     ],
   );
 
+  const sortableRootIds = useMemo(
+    () =>
+      [...elements]
+        .filter((el) => !el.parentId)
+        .sort((a, b) => a.order - b.order)
+        .map((el) => el.id),
+    [elements],
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -290,7 +374,7 @@ export default function Builder() {
           {/* Canvas */}
           <div className="flex-1 overflow-auto p-4">
             <SortableContext
-              items={elements.map((el) => el.id)}
+              items={sortableRootIds}
               strategy={verticalListSortingStrategy}
             >
               <Canvas />
