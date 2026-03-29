@@ -104,17 +104,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response, next: Nex
       throw new AppError('Template not found', 404);
     }
 
-    // Prepare pages data
+    // Prepare pages data - cast to JSON for Prisma
     const pagesData = template
       ? template.pages.map((page) => ({
           name: page.name,
           slug: page.slug,
           isHomepage: page.isHomepage,
           order: page.order,
-          elements: page.elements.map((el) => ({
+          elements: JSON.parse(JSON.stringify(page.elements.map((el) => ({
             ...el,
-            id: uuidv4(), // Generate new IDs for template elements
-          })),
+            id: uuidv4(),
+          })))),
         }))
       : [
           {
@@ -133,11 +133,11 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response, next: Nex
         slug,
         userId: req.user!.userId,
         templateId,
-        settings: template?.settings || {
+        settings: JSON.parse(JSON.stringify(template?.settings || {
           primaryColor: '#3b82f6',
           secondaryColor: '#1f2937',
           fontFamily: 'Inter',
-        },
+        })),
         pages: {
           create: pagesData,
         },

@@ -99,6 +99,7 @@ export const templates: Template[] = [
             order: 5,
             props: {
               text: 'Get in Touch',
+              linkType: 'external',
               url: '#contact',
               openInNewTab: false,
               variant: 'solid',
@@ -280,6 +281,7 @@ export const templates: Template[] = [
             order: 4,
             props: {
               text: 'Join Our Team',
+              linkType: 'external',
               url: '#join',
               openInNewTab: false,
               variant: 'solid',
@@ -364,6 +366,7 @@ export const templates: Template[] = [
             order: 3,
             props: {
               text: 'Get Tickets',
+              linkType: 'external',
               url: '#tickets',
               openInNewTab: false,
               variant: 'solid',
@@ -491,6 +494,7 @@ export const templates: Template[] = [
             order: 5,
             props: {
               text: 'Become a Member',
+              linkType: 'external',
               url: '#join',
               openInNewTab: false,
               variant: 'solid',

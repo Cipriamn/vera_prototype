@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useBuilderStore } from '@/stores/builderStore';
 
 export default function Toolbar() {
   const navigate = useNavigate();
+  const [showNewPageModal, setShowNewPageModal] = useState(false);
+  const [newPageName, setNewPageName] = useState('');
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
+
   const {
     site,
     currentPage,
     isSaving,
     hasUnsavedChanges,
     savePage,
+    createPage,
     publishSite,
     unpublishSite,
   } = useBuilderStore();
@@ -32,7 +38,22 @@ export default function Toolbar() {
     }
   };
 
+  const handleCreatePage = async () => {
+    if (!newPageName.trim() || !site) return;
+
+    setIsCreatingPage(true);
+    const pageId = await createPage(newPageName.trim());
+    setIsCreatingPage(false);
+
+    if (pageId) {
+      setShowNewPageModal(false);
+      setNewPageName('');
+      navigate(`/builder/${site.id}/${pageId}`);
+    }
+  };
+
   return (
+    <>
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
       {/* Left section */}
       <div className="flex items-center gap-4">
@@ -59,9 +80,9 @@ export default function Toolbar() {
       </div>
 
       {/* Center section - Page selector */}
-      {site?.pages && site.pages.length > 0 && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Pages:</span>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500">Pages:</span>
+        {site?.pages && site.pages.length > 0 && (
           <select
             value={currentPage?.id || ''}
             onChange={(e) => {
@@ -76,8 +97,18 @@ export default function Toolbar() {
               </option>
             ))}
           </select>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => setShowNewPageModal(true)}
+          className="flex items-center gap-1 px-2 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded-md"
+          title="Add new page"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>New Page</span>
+        </button>
+      </div>
 
       {/* Right section */}
       <div className="flex items-center gap-3">
@@ -144,6 +175,56 @@ export default function Toolbar() {
           </button>
         )}
       </div>
+
     </header>
+
+      {/* New Page Modal */}
+      {showNewPageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New Page</h2>
+            <div className="mb-4">
+              <label htmlFor="pageName" className="block text-sm font-medium text-gray-700 mb-1">
+                Page Name
+              </label>
+              <input
+                type="text"
+                id="pageName"
+                value={newPageName}
+                onChange={(e) => setNewPageName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreatePage();
+                  if (e.key === 'Escape') {
+                    setShowNewPageModal(false);
+                    setNewPageName('');
+                  }
+                }}
+                placeholder="e.g., About, Contact, Gallery"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowNewPageModal(false);
+                  setNewPageName('');
+                }}
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePage}
+                disabled={!newPageName.trim() || isCreatingPage}
+                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreatingPage ? 'Creating...' : 'Create Page'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
