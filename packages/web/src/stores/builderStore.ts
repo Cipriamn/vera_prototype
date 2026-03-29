@@ -1,3 +1,4 @@
+import { isLayoutType } from "@/builder/elementMeta";
 import { api } from "@/utils/api";
 import type {
   ColumnElement,
@@ -8,7 +9,7 @@ import type {
   Page,
   Site,
 } from "@vera/shared";
-import { isLayoutElement } from "@vera/shared";
+import { cloneDefaultElementProps, isLayoutElement } from "@vera/shared";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 
@@ -104,62 +105,59 @@ function insertIntoColumnAtSlot(
   });
 }
 
-// Default props for new elements
-const defaultProps: Record<ElementType, Record<string, unknown>> = {
-  text: {
-    content: "Click to edit text",
-    fontSize: 16,
-    fontFamily: "Inter",
-    fontWeight: "normal",
-    color: "#1f2937",
-    textAlign: "left",
-    lineHeight: 1.5,
-    padding: { top: 8, right: 8, bottom: 8, left: 8 },
-  },
-  image: {
-    src: "",
-    alt: "",
-    width: "full",
-    height: "auto",
-    objectFit: "cover",
-    borderRadius: 0,
-    padding: { top: 8, right: 8, bottom: 8, left: 8 },
-  },
-  video: {
-    url: "",
-    aspectRatio: "16:9",
-    autoplay: false,
-    controls: true,
-    padding: { top: 8, right: 8, bottom: 8, left: 8 },
-  },
-  button: {
-    text: "Click me",
-    linkType: "external",
-    url: "#",
-    pageId: undefined,
-    openInNewTab: false,
-    variant: "solid",
-    size: "md",
-    backgroundColor: "#3b82f6",
-    textColor: "#ffffff",
-    borderRadius: 8,
-    fullWidth: false,
-    padding: { top: 8, right: 8, bottom: 8, left: 8 },
-  },
-  column: {
-    columns: 2,
-    gap: 16,
-    padding: { top: 16, right: 16, bottom: 16, left: 16 },
-    backgroundColor: "transparent",
-  },
-  grid: {
-    columns: 3,
-    rows: 2,
-    gap: 16,
-    padding: { top: 16, right: 16, bottom: 16, left: 16 },
-    backgroundColor: "transparent",
-  },
-};
+type FlowLayoutType = "stack" | "container";
+
+function mapFlowUpdate(
+  list: Element[],
+  flowId: string,
+  flowType: FlowLayoutType,
+  fn: (children: Element[]) => Element[],
+): Element[] {
+  return list.map((el) => {
+    if (el.id === flowId && el.type === flowType) {
+      const cur = [...((el as LayoutElement).children ?? [])];
+      return { ...(el as LayoutElement), children: fn(cur) } as Element;
+    }
+    if (isLayoutElement(el) && el.children?.length) {
+      return {
+        ...(el as LayoutElement),
+        children: mapFlowUpdate(el.children, flowId, flowType, fn),
+      } as Element;
+    }
+    return el;
+  });
+}
+
+function addToFlowAt(
+  elements: Element[],
+  flowId: string,
+  flowType: FlowLayoutType,
+  insertIndex: number,
+  newNode: Element,
+): Element[] {
+  return mapFlowUpdate(elements, flowId, flowType, (children) => {
+    const sorted = [...children].sort((a, b) => a.order - b.order);
+    const without = sorted.filter((c) => c.id !== newNode.id);
+    const clamped = Math.max(0, Math.min(insertIndex, without.length));
+    const merged = [
+      ...without.slice(0, clamped),
+      newNode,
+      ...without.slice(clamped),
+    ];
+    return merged.map((c, i) => ({ ...c, order: i }));
+  });
+}
+
+function remapSubtreeIds(el: Element): Element {
+  const base = { ...el, id: uuidv4() };
+  if (isLayoutElement(base) && base.children?.length) {
+    return {
+      ...base,
+      children: base.children.map(remapSubtreeIds),
+    } as Element;
+  }
+  return base;
+}
 
 interface BuilderState {
   site: Site | null;
@@ -192,6 +190,18 @@ interface BuilderState {
     columnId: string,
     slotIndex: number,
     type: ElementType,
+  ) => void;
+  addFlowChild: (
+    flowId: string,
+    flowType: FlowLayoutType,
+    insertIndex: number,
+    type: ElementType,
+  ) => void;
+  moveElementToFlowSlot: (
+    elementId: string,
+    flowId: string,
+    flowType: FlowLayoutType,
+    insertIndex: number,
   ) => void;
   moveElementToGridCell: (
     elementId: string,
@@ -366,14 +376,14 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   addElement: (type: ElementType, index?: number, parentId?: string) => {
     const { elements } = get();
-    const newElement: Element = {
+    const newElement = {
       id: uuidv4(),
       type,
-      props: { ...defaultProps[type] },
+      props: cloneDefaultElementProps(type),
       parentId,
       order: index ?? elements.length,
-      ...(type === "column" || type === "grid" ? { children: [] } : {}),
-    } as Element;
+      ...(isLayoutType(type) ? { children: [] } : {}),
+    } as unknown as Element;
 
     let newElements: Element[];
     if (index !== undefined) {
@@ -397,13 +407,13 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (isNestedLayoutDisallowedInSlot(type)) return;
 
     const { elements } = get();
-    const newChild: Element = {
+    const newChild = {
       id: uuidv4(),
       type,
-      props: { ...defaultProps[type] },
+      props: cloneDefaultElementProps(type),
       order: cellIndex,
-      ...(type === "column" || type === "grid" ? { children: [] } : {}),
-    } as Element;
+      ...(isLayoutType(type) ? { children: [] } : {}),
+    } as unknown as Element;
 
     const newElements = insertIntoGridAtCell(
       elements,
@@ -423,13 +433,13 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (isNestedLayoutDisallowedInSlot(type)) return;
 
     const { elements } = get();
-    const newChild: Element = {
+    const newChild = {
       id: uuidv4(),
       type,
-      props: { ...defaultProps[type] },
+      props: cloneDefaultElementProps(type),
       order: slotIndex,
-      ...(type === "column" || type === "grid" ? { children: [] } : {}),
-    } as Element;
+      ...(isLayoutType(type) ? { children: [] } : {}),
+    } as unknown as Element;
 
     const newElements = insertIntoColumnAtSlot(
       elements,
@@ -441,6 +451,66 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     set({
       elements: newElements,
       selectedElementId: newChild.id,
+      hasUnsavedChanges: true,
+    });
+  },
+
+  addFlowChild: (
+    flowId: string,
+    flowType: FlowLayoutType,
+    insertIndex: number,
+    type: ElementType,
+  ) => {
+    if (isNestedLayoutDisallowedInSlot(type)) return;
+
+    const { elements } = get();
+    const newChild = {
+      id: uuidv4(),
+      type,
+      props: cloneDefaultElementProps(type),
+      order: insertIndex,
+      ...(isLayoutType(type) ? { children: [] } : {}),
+    } as unknown as Element;
+
+    const newElements = addToFlowAt(
+      elements,
+      flowId,
+      flowType,
+      insertIndex,
+      newChild,
+    );
+
+    set({
+      elements: newElements,
+      selectedElementId: newChild.id,
+      hasUnsavedChanges: true,
+    });
+  },
+
+  moveElementToFlowSlot: (
+    elementId: string,
+    flowId: string,
+    flowType: FlowLayoutType,
+    insertIndex: number,
+  ) => {
+    if (elementId === flowId) return;
+
+    const { elements } = get();
+    const { next: without, found } = pluckElement(elements, elementId);
+    if (!found) return;
+
+    if (isNestedLayoutDisallowedInSlot(found.type)) return;
+
+    if (isLayoutElement(found) && containsDescendantId(found, flowId)) return;
+
+    const inserted = addToFlowAt(without, flowId, flowType, insertIndex, {
+      ...found,
+      order: insertIndex,
+    });
+
+    set({
+      elements: inserted,
+      selectedElementId: elementId,
       hasUnsavedChanges: true,
     });
   },
@@ -614,11 +684,10 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (!element) return;
 
     const elementIndex = elements.findIndex((el) => el.id === id);
-    const newElement: Element = {
-      ...JSON.parse(JSON.stringify(element)),
-      id: uuidv4(),
-      order: elementIndex + 1,
-    };
+    const newElement = remapSubtreeIds(
+      JSON.parse(JSON.stringify(element)) as Element,
+    );
+    newElement.order = elementIndex + 1;
 
     const newElements = [
       ...elements.slice(0, elementIndex + 1),
