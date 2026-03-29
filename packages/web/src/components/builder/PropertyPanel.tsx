@@ -22,9 +22,7 @@ function TextProperties({ element }: { element: Element }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Content
-        </label>
+        <label className="builder-field-label">Content</label>
         <textarea
           value={props.content}
           onChange={(e) =>
@@ -33,15 +31,13 @@ function TextProperties({ element }: { element: Element }) {
             })
           }
           rows={3}
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Font Size
-          </label>
+          <label className="builder-field-label">Font Size</label>
           <input
             type="number"
             value={props.fontSize}
@@ -52,13 +48,11 @@ function TextProperties({ element }: { element: Element }) {
             }
             min={8}
             max={120}
-            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="builder-input"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Color
-          </label>
+          <label className="builder-field-label">Color</label>
           <input
             type="color"
             value={props.color}
@@ -67,15 +61,13 @@ function TextProperties({ element }: { element: Element }) {
                 props: { ...props, color: e.target.value },
               })
             }
-            className="w-full h-8 border border-gray-200 rounded-md cursor-pointer"
+            className="builder-color-input"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Font Weight
-        </label>
+        <label className="builder-field-label">Font Weight</label>
         <select
           value={props.fontWeight}
           onChange={(e) =>
@@ -83,7 +75,7 @@ function TextProperties({ element }: { element: Element }) {
               props: { ...props, fontWeight: e.target.value },
             })
           }
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         >
           <option value="normal">Normal</option>
           <option value="medium">Medium</option>
@@ -93,9 +85,7 @@ function TextProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Text Align
-        </label>
+        <label className="builder-field-label">Text Align</label>
         <div className="flex gap-1">
           {(["left", "center", "right", "justify"] as const).map((align) => (
             <button
@@ -105,10 +95,10 @@ function TextProperties({ element }: { element: Element }) {
                   props: { ...props, textAlign: align },
                 })
               }
-              className={`flex-1 py-1.5 text-xs border rounded ${
+              className={`flex-1 py-1.5 text-xs border rounded-lg transition-colors ${
                 props.textAlign === align
-                  ? "bg-primary-100 border-primary-300 text-primary-700"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? "builder-segment-active"
+                  : "builder-segment-inactive"
               }`}
             >
               {align.charAt(0).toUpperCase() + align.slice(1)}
@@ -129,9 +119,7 @@ function ImageProperties({ element }: { element: Element }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Image URL
-        </label>
+        <label className="builder-field-label">Image URL</label>
         <input
           type="text"
           value={props.src}
@@ -141,14 +129,12 @@ function ImageProperties({ element }: { element: Element }) {
             })
           }
           placeholder="https://example.com/image.jpg"
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Alt Text
-        </label>
+        <label className="builder-field-label">Alt Text</label>
         <input
           type="text"
           value={props.alt}
@@ -158,14 +144,12 @@ function ImageProperties({ element }: { element: Element }) {
             })
           }
           placeholder="Image description"
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Object Fit
-        </label>
+        <label className="builder-field-label">Object Fit</label>
         <select
           value={props.objectFit}
           onChange={(e) =>
@@ -180,7 +164,7 @@ function ImageProperties({ element }: { element: Element }) {
               },
             })
           }
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         >
           <option value="cover">Cover</option>
           <option value="contain">Contain</option>
@@ -190,9 +174,7 @@ function ImageProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Border Radius
-        </label>
+        <label className="builder-field-label">Border Radius</label>
         <input
           type="number"
           value={props.borderRadius}
@@ -203,7 +185,7 @@ function ImageProperties({ element }: { element: Element }) {
           }
           min={0}
           max={100}
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
     </div>
@@ -219,9 +201,7 @@ function VideoProperties({ element }: { element: Element }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Video URL
-        </label>
+        <label className="builder-field-label">Video URL</label>
         <input
           type="text"
           value={props.url}
@@ -231,14 +211,12 @@ function VideoProperties({ element }: { element: Element }) {
             })
           }
           placeholder="https://youtube.com/watch?v=..."
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Aspect Ratio
-        </label>
+        <label className="builder-field-label">Aspect Ratio</label>
         <select
           value={props.aspectRatio}
           onChange={(e) =>
@@ -249,7 +227,7 @@ function VideoProperties({ element }: { element: Element }) {
               },
             })
           }
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         >
           <option value="16:9">16:9 (Widescreen)</option>
           <option value="4:3">4:3 (Standard)</option>
@@ -258,8 +236,8 @@ function VideoProperties({ element }: { element: Element }) {
         </select>
       </div>
 
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-4 flex-wrap">
+        <label className="flex items-center gap-2 text-sm text-builder-text">
           <input
             type="checkbox"
             checked={props.autoplay}
@@ -268,12 +246,12 @@ function VideoProperties({ element }: { element: Element }) {
                 props: { ...props, autoplay: e.target.checked },
               })
             }
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="builder-checkbox"
           />
           Autoplay
         </label>
 
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm text-builder-text">
           <input
             type="checkbox"
             checked={props.controls}
@@ -282,9 +260,9 @@ function VideoProperties({ element }: { element: Element }) {
                 props: { ...props, controls: e.target.checked },
               })
             }
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="builder-checkbox"
           />
-          Show Controls
+          Show controls
         </label>
       </div>
     </div>
@@ -301,9 +279,7 @@ function ButtonProperties({ element }: { element: Element }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Button Text
-        </label>
+        <label className="builder-field-label">Button Text</label>
         <input
           type="text"
           value={props.text}
@@ -312,14 +288,12 @@ function ButtonProperties({ element }: { element: Element }) {
               props: { ...props, text: e.target.value },
             })
           }
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Link Type
-        </label>
+        <label className="builder-field-label">Link Type</label>
         <div className="flex gap-1">
           <button
             type="button"
@@ -328,10 +302,10 @@ function ButtonProperties({ element }: { element: Element }) {
                 props: { ...props, linkType: "external", pageId: undefined },
               })
             }
-            className={`flex-1 py-1.5 text-xs border rounded ${
+            className={`flex-1 py-1.5 text-xs border rounded-lg transition-colors ${
               linkType === "external"
-                ? "bg-primary-100 border-primary-300 text-primary-700"
-                : "border-gray-200 hover:bg-gray-50"
+                ? "builder-segment-active"
+                : "builder-segment-inactive"
             }`}
           >
             External URL
@@ -343,10 +317,10 @@ function ButtonProperties({ element }: { element: Element }) {
                 props: { ...props, linkType: "page", url: "" },
               })
             }
-            className={`flex-1 py-1.5 text-xs border rounded ${
+            className={`flex-1 py-1.5 text-xs border rounded-lg transition-colors ${
               linkType === "page"
-                ? "bg-primary-100 border-primary-300 text-primary-700"
-                : "border-gray-200 hover:bg-gray-50"
+                ? "builder-segment-active"
+                : "builder-segment-inactive"
             }`}
           >
             Site Page
@@ -356,7 +330,7 @@ function ButtonProperties({ element }: { element: Element }) {
 
       {linkType === "external" ? (
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">URL</label>
+          <label className="builder-field-label">URL</label>
           <input
             type="text"
             value={props.url}
@@ -366,12 +340,12 @@ function ButtonProperties({ element }: { element: Element }) {
               })
             }
             placeholder="https://..."
-            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="builder-input"
           />
         </div>
       ) : (
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Select Page</label>
+          <label className="builder-field-label">Select Page</label>
           <select
             value={props.pageId || ""}
             onChange={(e) =>
@@ -379,26 +353,26 @@ function ButtonProperties({ element }: { element: Element }) {
                 props: { ...props, pageId: e.target.value || undefined },
               })
             }
-            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="builder-input"
           >
             <option value="">-- Select a page --</option>
             {site?.pages?.map((page) => (
               <option key={page.id} value={page.id}>
-                {page.name} {page.isHomepage ? '(Home)' : ''}
+                {page.name} {page.isHomepage ? "(Home)" : ""}
               </option>
             ))}
           </select>
           {!site?.pages?.length && (
-            <p className="text-xs text-gray-500 mt-1">No pages available</p>
+            <p className="text-xs text-builder-text-muted mt-1">
+              No pages available
+            </p>
           )}
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Background
-          </label>
+          <label className="builder-field-label">Background</label>
           <input
             type="color"
             value={props.backgroundColor}
@@ -407,13 +381,11 @@ function ButtonProperties({ element }: { element: Element }) {
                 props: { ...props, backgroundColor: e.target.value },
               })
             }
-            className="w-full h-8 border border-gray-200 rounded-md cursor-pointer"
+            className="builder-color-input"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Text Color
-          </label>
+          <label className="builder-field-label">Text Color</label>
           <input
             type="color"
             value={props.textColor}
@@ -422,15 +394,13 @@ function ButtonProperties({ element }: { element: Element }) {
                 props: { ...props, textColor: e.target.value },
               })
             }
-            className="w-full h-8 border border-gray-200 rounded-md cursor-pointer"
+            className="builder-color-input"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Variant
-        </label>
+        <label className="builder-field-label">Variant</label>
         <select
           value={props.variant}
           onChange={(e) =>
@@ -441,7 +411,7 @@ function ButtonProperties({ element }: { element: Element }) {
               },
             })
           }
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         >
           <option value="solid">Solid</option>
           <option value="outline">Outline</option>
@@ -450,9 +420,7 @@ function ButtonProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Size
-        </label>
+        <label className="builder-field-label">Size</label>
         <div className="flex gap-1">
           {(["sm", "md", "lg"] as const).map((size) => (
             <button
@@ -462,10 +430,10 @@ function ButtonProperties({ element }: { element: Element }) {
                   props: { ...props, size },
                 })
               }
-              className={`flex-1 py-1.5 text-xs border rounded uppercase ${
+              className={`flex-1 py-1.5 text-xs border rounded-lg uppercase transition-colors ${
                 props.size === size
-                  ? "bg-primary-100 border-primary-300 text-primary-700"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? "builder-segment-active"
+                  : "builder-segment-inactive"
               }`}
             >
               {size}
@@ -474,7 +442,7 @@ function ButtonProperties({ element }: { element: Element }) {
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-builder-text">
         <input
           type="checkbox"
           checked={props.fullWidth}
@@ -483,12 +451,12 @@ function ButtonProperties({ element }: { element: Element }) {
               props: { ...props, fullWidth: e.target.checked },
             })
           }
-          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          className="builder-checkbox"
         />
-        Full Width
+        Full width
       </label>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-builder-text">
         <input
           type="checkbox"
           checked={props.openInNewTab}
@@ -497,9 +465,9 @@ function ButtonProperties({ element }: { element: Element }) {
               props: { ...props, openInNewTab: e.target.checked },
             })
           }
-          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          className="builder-checkbox"
         />
-        Open in New Tab
+        Open in new tab
       </label>
     </div>
   );
@@ -514,9 +482,7 @@ function ColumnProperties({ element }: { element: Element }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Columns
-        </label>
+        <label className="builder-field-label">Columns</label>
         <div className="flex gap-1">
           {([2, 3, 4] as const).map((cols) => (
             <button
@@ -526,10 +492,10 @@ function ColumnProperties({ element }: { element: Element }) {
                   props: { ...props, columns: cols },
                 })
               }
-              className={`flex-1 py-1.5 text-xs border rounded ${
+              className={`flex-1 py-1.5 text-xs border rounded-lg transition-colors ${
                 props.columns === cols
-                  ? "bg-primary-100 border-primary-300 text-primary-700"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? "builder-segment-active"
+                  : "builder-segment-inactive"
               }`}
             >
               {cols} cols
@@ -539,9 +505,7 @@ function ColumnProperties({ element }: { element: Element }) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Gap (px)
-        </label>
+        <label className="builder-field-label">Gap (px)</label>
         <input
           type="number"
           value={props.gap}
@@ -552,14 +516,12 @@ function ColumnProperties({ element }: { element: Element }) {
           }
           min={0}
           max={100}
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Background
-        </label>
+        <label className="builder-field-label">Background</label>
         <input
           type="color"
           value={
@@ -572,7 +534,7 @@ function ColumnProperties({ element }: { element: Element }) {
               props: { ...props, backgroundColor: e.target.value },
             })
           }
-          className="w-full h-8 border border-gray-200 rounded-md cursor-pointer"
+          className="builder-color-input"
         />
       </div>
     </div>
@@ -589,9 +551,7 @@ function GridProperties({ element }: { element: Element }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Columns
-          </label>
+          <label className="builder-field-label">Columns</label>
           <input
             type="number"
             value={props.columns}
@@ -602,13 +562,11 @@ function GridProperties({ element }: { element: Element }) {
             }
             min={1}
             max={12}
-            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="builder-input"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Rows
-          </label>
+          <label className="builder-field-label">Rows</label>
           <input
             type="number"
             value={props.rows}
@@ -619,15 +577,13 @@ function GridProperties({ element }: { element: Element }) {
             }
             min={1}
             max={12}
-            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="builder-input"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Gap (px)
-        </label>
+        <label className="builder-field-label">Gap (px)</label>
         <input
           type="number"
           value={props.gap}
@@ -638,14 +594,12 @@ function GridProperties({ element }: { element: Element }) {
           }
           min={0}
           max={100}
-          className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="builder-input"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">
-          Background
-        </label>
+        <label className="builder-field-label">Background</label>
         <input
           type="color"
           value={
@@ -658,7 +612,7 @@ function GridProperties({ element }: { element: Element }) {
               props: { ...props, backgroundColor: e.target.value },
             })
           }
-          className="w-full h-8 border border-gray-200 rounded-md cursor-pointer"
+          className="builder-color-input"
         />
       </div>
     </div>
@@ -674,49 +628,55 @@ export default function PropertyPanel() {
 
   if (!selectedElement) {
     return (
-      <div className="w-72 bg-gray-50 border-l border-gray-200 p-4">
-        <div className="text-center text-gray-500 mt-8">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-            />
-          </svg>
-          <p className="mt-4 text-sm">
-            Select an element to edit its properties
+      <aside className="w-72 shrink-0 border-l border-builder-border bg-builder-surface/90 backdrop-blur-sm p-4 overflow-y-auto">
+        <div className="text-center text-builder-text-muted mt-10">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-builder-border bg-builder-surface-muted/40">
+            <svg
+              className="h-7 w-7 text-builder-text-muted/70"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+              />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-builder-text">
+            Nothing selected
+          </p>
+          <p className="mt-1 text-xs leading-relaxed">
+            Click a block on the canvas to edit its properties.
           </p>
         </div>
-      </div>
+      </aside>
     );
   }
 
   return (
-    <div className="w-72 bg-gray-50 border-l border-gray-200 overflow-y-auto">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-900 capitalize">
-            {selectedElement.type} Properties
+    <aside className="w-72 shrink-0 border-l border-builder-border bg-builder-surface/90 backdrop-blur-sm overflow-y-auto">
+      <div className="p-4 border-b border-builder-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold font-display text-builder-text capitalize">
+            {selectedElement.type}
           </h3>
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => duplicateElement(selectedElement.id)}
-            className="flex-1 px-2 py-1 text-xs bg-white border border-gray-200 rounded hover:bg-gray-50"
+            className="flex-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-builder-border bg-builder-surface hover:bg-builder-surface-muted transition-colors"
           >
             Duplicate
           </button>
           <button
+            type="button"
             onClick={() => deleteElement(selectedElement.id)}
-            className="flex-1 px-2 py-1 text-xs bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100"
+            className="flex-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 bg-red-50/80 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors"
           >
             Delete
           </button>
@@ -743,6 +703,6 @@ export default function PropertyPanel() {
           <GridProperties element={selectedElement} />
         )}
       </div>
-    </div>
+    </aside>
   );
 }
