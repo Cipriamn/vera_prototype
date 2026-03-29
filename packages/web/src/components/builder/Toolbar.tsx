@@ -137,11 +137,11 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
 
   return (
     <>
-      <header className="h-14 shrink-0 flex items-center justify-between gap-3 px-4 md:px-5 border-b border-builder-border bg-builder-surface/80 backdrop-blur-md">
+      <header className="min-h-[3.25rem] shrink-0 flex items-center justify-between gap-3 px-4 md:px-6 py-2 border-b border-builder-border bg-builder-surface/80 backdrop-blur-md">
         <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <Link
             to="/dashboard"
-            className="text-builder-text-muted hover:text-builder-text flex items-center gap-2 shrink-0 rounded-lg px-2 py-1.5 -ml-2 transition-colors hover:bg-builder-surface-muted"
+            className="text-builder-text-muted hover:text-builder-text flex items-center gap-2 shrink-0 rounded-lg px-3 py-2 -ml-1 transition-colors hover:bg-builder-surface-muted"
           >
             <svg
               className="w-5 h-5"
@@ -171,8 +171,8 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-builder-text-muted hidden lg:inline">
+        <div className="flex items-center gap-2.5 md:gap-3 shrink-0">
+          <span className="text-xs text-builder-text-muted hidden lg:inline pr-0.5">
             Pages
           </span>
           {site?.pages && site.pages.length > 0 && (
@@ -182,7 +182,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
                 const pageId = e.target.value;
                 navigate(`/builder/${site.id}/${pageId}`);
               }}
-              className="builder-select text-sm py-1 max-w-[140px] md:max-w-[200px]"
+              className="builder-select text-sm py-2 min-h-[2.5rem] max-w-[140px] md:max-w-[220px]"
             >
               {site.pages.map((page) => (
                 <option key={page.id} value={page.id}>
@@ -195,7 +195,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             type="button"
             onClick={() => setShowPageSettingsModal(true)}
             disabled={!currentPage}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-sm text-builder-text border border-builder-border rounded-lg hover:bg-builder-surface-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] text-sm text-builder-text border border-builder-border rounded-lg hover:bg-builder-surface-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Page name, URL, SEO, delete"
           >
             <svg
@@ -222,7 +222,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
           <button
             type="button"
             onClick={() => setShowNewPageModal(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/35 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 min-h-[2.5rem] text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/35 rounded-lg transition-colors"
             title="Add new page"
           >
             <svg
@@ -242,11 +242,11 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 md:gap-3 shrink-0">
           <button
             type="button"
             onClick={onToggleTheme}
-            className="p-2 rounded-lg border border-builder-border text-builder-text-muted hover:text-builder-text hover:bg-builder-surface-muted transition-colors"
+            className="p-2.5 min-h-[2.5rem] min-w-[2.5rem] inline-flex items-center justify-center rounded-lg border border-builder-border text-builder-text-muted hover:text-builder-text hover:bg-builder-surface-muted transition-colors"
             title={theme === "dark" ? "Light mode" : "Dark mode"}
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -338,7 +338,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             type="button"
             onClick={handleSave}
             disabled={isSaving || !hasUnsavedChanges}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 min-h-[2.5rem] text-sm font-medium rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
           >
             Save
           </button>
@@ -347,7 +347,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             type="button"
             onClick={handlePreview}
             disabled={!site?.isPublished}
-            className="hidden md:inline-flex px-3 py-1.5 text-sm rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
+            className="hidden md:inline-flex items-center px-4 py-2 min-h-[2.5rem] text-sm rounded-lg border border-builder-border hover:bg-builder-surface-muted disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
             title={
               !site?.isPublished ? "Publish site to preview" : "Preview site"
             }
@@ -359,7 +359,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             <button
               type="button"
               onClick={handleUnpublish}
-              className="px-3 py-1.5 text-sm rounded-lg bg-builder-surface-muted text-builder-text hover:opacity-90 transition-opacity"
+              className="px-4 py-2 min-h-[2.5rem] text-sm rounded-lg bg-builder-surface-muted text-builder-text hover:opacity-90 transition-opacity"
             >
               Unpublish
             </button>
@@ -367,7 +367,7 @@ export default function Toolbar({ theme, onToggleTheme }: ToolbarProps) {
             <button
               type="button"
               onClick={handlePublish}
-              className="px-4 py-1.5 text-sm font-semibold rounded-full bg-primary-600 text-white hover:bg-primary-500 shadow-sm shadow-primary-600/25 transition-colors"
+              className="px-5 py-2 min-h-[2.5rem] text-sm font-semibold rounded-full bg-primary-600 text-white hover:bg-primary-500 shadow-sm shadow-primary-600/25 transition-colors"
             >
               Publish
             </button>
