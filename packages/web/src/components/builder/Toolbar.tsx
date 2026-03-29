@@ -41,7 +41,7 @@ export default function Toolbar() {
       setPageIsHomepage(currentPage.isHomepage);
       setPageSettingsError(null);
     }
-  }, [showPageSettingsModal, currentPage]);
+  }, [showPageSettingsModal, currentPage?.id]);
 
   const handleSave = async () => {
     await savePage();
