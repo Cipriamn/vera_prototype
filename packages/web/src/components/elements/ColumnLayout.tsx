@@ -1,47 +1,15 @@
-import ButtonBlock from "@/components/elements/ButtonBlock";
-import GridLayout from "@/components/elements/GridLayout";
-import ImageBlock from "@/components/elements/ImageBlock";
-import TextBlock from "@/components/elements/TextBlock";
-import VideoBlock from "@/components/elements/VideoBlock";
 import {
   LayoutSlotBlockedOverlay,
   useDisallowedLayoutOverSlot,
 } from "@/hooks/useDisallowedLayoutOverSlot";
+import { gridAlignmentToCss } from "@/lib/flexMaps";
 import { useBuilderStore } from "@/stores/builderStore";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import type { ColumnElement, Element } from "@vera/shared";
 
 interface ColumnLayoutProps {
   element: ColumnElement;
-}
-
-function ColumnCellInner({
-  element,
-  isSelected,
-}: {
-  element: Element;
-  isSelected: boolean;
-}) {
-  switch (element.type) {
-    case "text":
-      return <TextBlock element={element} isEditing={isSelected} />;
-    case "image":
-      return <ImageBlock element={element} />;
-    case "video":
-      return <VideoBlock element={element} />;
-    case "button":
-      return <ButtonBlock element={element} />;
-    case "column":
-      return <ColumnLayout element={element} />;
-    case "grid":
-      return <GridLayout element={element} />;
-    default:
-      return (
-        <div className="p-2 rounded-md border border-builder-border bg-builder-surface-muted text-builder-text-muted text-xs">
-          Unknown element
-        </div>
-      );
-  }
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }
 
 function ColumnEmptySlot({
@@ -93,12 +61,14 @@ function ColumnFilledSlot({
   child,
   isChildSelected,
   onSelectChild,
+  renderChild,
 }: {
   columnId: string;
   slotIndex: number;
   child: Element;
   isChildSelected: boolean;
   onSelectChild: (id: string) => void;
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }) {
   const disallowed = useDisallowedLayoutOverSlot();
   const { setNodeRef: setDropRef, isOver } = useDroppable({
@@ -152,7 +122,7 @@ function ColumnFilledSlot({
       <div
         className={`w-full min-h-0 ${blocked ? "opacity-40" : ""} ${isChildSelected ? "ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-2 ring-offset-builder-canvas rounded-md" : ""}`}
       >
-        <ColumnCellInner element={child} isSelected={isChildSelected} />
+        {renderChild(child, isChildSelected)}
       </div>
     </div>
   );
@@ -164,12 +134,14 @@ function ColumnDropSlot({
   child,
   isChildSelected,
   onSelectChild,
+  renderChild,
 }: {
   columnId: string;
   slotIndex: number;
   child: Element | undefined;
   isChildSelected: boolean;
   onSelectChild: (id: string) => void;
+  renderChild: (element: Element, isSelected: boolean) => React.ReactNode;
 }) {
   if (!child) {
     return <ColumnEmptySlot columnId={columnId} slotIndex={slotIndex} />;
@@ -181,11 +153,15 @@ function ColumnDropSlot({
       child={child}
       isChildSelected={isChildSelected}
       onSelectChild={onSelectChild}
+      renderChild={renderChild}
     />
   );
 }
 
-export default function ColumnLayout({ element }: ColumnLayoutProps) {
+export default function ColumnLayout({
+  element,
+  renderChild,
+}: ColumnLayoutProps) {
   const props = element.props;
   const { selectedElementId, selectElement } = useBuilderStore();
 
@@ -195,6 +171,10 @@ export default function ColumnLayout({ element }: ColumnLayoutProps) {
 
   const slotCount = props.columns;
   const children = element.children ?? [];
+  const columnGap = props.columnGap ?? props.gap;
+  const rowGap = props.rowGap ?? props.gap;
+  const alignItems = props.alignItems ?? "stretch";
+  const justifyItems = props.justifyItems ?? "stretch";
 
   return (
     <div
@@ -206,7 +186,10 @@ export default function ColumnLayout({ element }: ColumnLayoutProps) {
             : props.backgroundColor,
         display: "grid",
         gridTemplateColumns: `repeat(${slotCount}, 1fr)`,
-        gap: `${props.gap}px`,
+        columnGap: `${columnGap}px`,
+        rowGap: `${rowGap}px`,
+        alignItems: gridAlignmentToCss(alignItems),
+        justifyItems: gridAlignmentToCss(justifyItems),
       }}
     >
       {Array.from({ length: slotCount }).map((_, index) => {
@@ -219,6 +202,7 @@ export default function ColumnLayout({ element }: ColumnLayoutProps) {
             child={child}
             isChildSelected={child ? selectedElementId === child.id : false}
             onSelectChild={(id) => selectElement(id)}
+            renderChild={renderChild}
           />
         );
       })}
