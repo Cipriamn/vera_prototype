@@ -1,8 +1,44 @@
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "@/utils/api";
-import type { Site } from "@vera/shared";
+import type { Site, Template } from "@vera/shared";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+type TemplateSummary = Pick<
+  Template,
+  "id" | "name" | "description" | "thumbnail" | "category"
+>;
+
+const CATEGORY_PREVIEW: Record<Template["category"], string> = {
+  "student-house": "from-violet-600 to-purple-800",
+  "sports-team": "from-emerald-600 to-teal-800",
+  event: "from-amber-500 to-orange-700",
+  association: "from-sky-600 to-indigo-800",
+};
+
+function TemplatePreview({
+  category,
+  thumbnail,
+}: {
+  category: Template["category"];
+  thumbnail: string;
+}) {
+  const [imgOk, setImgOk] = useState(true);
+  return (
+    <div
+      className={`relative h-24 w-full overflow-hidden rounded-md bg-gradient-to-br shrink-0 ${CATEGORY_PREVIEW[category]}`}
+    >
+      {imgOk ? (
+        <img
+          src={thumbnail}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={() => setImgOk(false)}
+        />
+      ) : null}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,10 +49,47 @@ export default function Dashboard() {
   const [newSiteName, setNewSiteName] = useState("");
   const [createSiteError, setCreateSiteError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [templatesList, setTemplatesList] = useState<TemplateSummary[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [templatesError, setTemplatesError] = useState(false);
+  /** `null` = blank site (no template). */
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     loadSites();
   }, []);
+
+  useEffect(() => {
+    if (!showCreateModal) return;
+
+    let cancelled = false;
+    setTemplatesLoading(true);
+    setTemplatesError(false);
+    (async () => {
+      try {
+        const response = await api.get<{ data: TemplateSummary[] }>(
+          "/templates",
+        );
+        if (!cancelled) {
+          setTemplatesList(response.data.data ?? []);
+        }
+      } catch {
+        if (!cancelled) {
+          setTemplatesError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setTemplatesLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showCreateModal]);
 
   const loadSites = async () => {
     try {
@@ -36,11 +109,18 @@ export default function Dashboard() {
     setIsCreating(true);
     setCreateSiteError(null);
     try {
-      const response = await api.post("/sites", { name: newSiteName });
+      const payload: { name: string; templateId?: string } = {
+        name: newSiteName.trim(),
+      };
+      if (selectedTemplateId) {
+        payload.templateId = selectedTemplateId;
+      }
+      const response = await api.post("/sites", payload);
       const newSite = response.data.data;
       setSites([...sites, newSite]);
       setShowCreateModal(false);
       setNewSiteName("");
+      setSelectedTemplateId(null);
       setCreateSiteError(null);
       navigate(`/builder/${newSite.id}`);
     } catch (error) {
@@ -98,6 +178,7 @@ export default function Dashboard() {
           <button
             onClick={() => {
               setCreateSiteError(null);
+              setSelectedTemplateId(null);
               setShowCreateModal(true);
             }}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -135,6 +216,7 @@ export default function Dashboard() {
             <button
               onClick={() => {
                 setCreateSiteError(null);
+                setSelectedTemplateId(null);
                 setShowCreateModal(true);
               }}
               className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -202,8 +284,8 @@ export default function Dashboard() {
 
       {/* Create site modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-auto my-8 p-6 max-h-[min(90vh,calc(100vh-2rem))] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Create New Site
             </h3>
@@ -233,12 +315,72 @@ export default function Dashboard() {
                   </p>
                 )}
               </div>
+
+              <div className="mb-4">
+                <span className="block text-sm font-medium text-gray-700 mb-2">
+                  Template
+                </span>
+                {templatesLoading && (
+                  <p className="text-sm text-gray-500">Loading templates…</p>
+                )}
+                {templatesError && !templatesLoading && (
+                  <p className="text-sm text-amber-700">
+                    Could not load templates. You can still create a blank site.
+                  </p>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTemplateId(null)}
+                    className={`text-left rounded-lg border-2 p-3 transition-colors ${
+                      selectedTemplateId === null
+                        ? "border-primary-600 bg-primary-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="h-24 w-full rounded-md bg-gradient-to-br from-slate-200 to-slate-400 mb-2 flex items-center justify-center text-slate-600 text-sm font-medium">
+                      Blank
+                    </div>
+                    <p className="font-medium text-gray-900 text-sm">
+                      Start from scratch
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Empty homepage — add your own blocks
+                    </p>
+                  </button>
+                  {templatesList.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedTemplateId(t.id)}
+                      className={`text-left rounded-lg border-2 p-3 transition-colors ${
+                        selectedTemplateId === t.id
+                          ? "border-primary-600 bg-primary-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <TemplatePreview
+                        category={t.category}
+                        thumbnail={t.thumbnail}
+                      />
+                      <p className="font-medium text-gray-900 text-sm mt-2">
+                        {t.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                        {t.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
                     setNewSiteName("");
+                    setSelectedTemplateId(null);
                     setCreateSiteError(null);
                   }}
                   className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
