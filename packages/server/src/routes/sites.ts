@@ -1,3 +1,4 @@
+import type { Element } from "@vera/shared";
 import { NextFunction, Response, Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -6,6 +7,18 @@ import { prisma } from "../index.js";
 import { authenticate, AuthRequest } from "../middleware/auth.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { generateUniqueSlug } from "../utils/slug.js";
+
+function assignNewElementIds(node: Element): Element {
+  const next = { ...node, id: uuidv4() } as Element;
+  const children = (next as { children?: Element[] }).children;
+  if (children?.length) {
+    return {
+      ...next,
+      children: children.map(assignNewElementIds),
+    } as Element;
+  }
+  return next;
+}
 
 const router = Router();
 
@@ -137,10 +150,9 @@ router.post(
             order: page.order,
             elements: JSON.parse(
               JSON.stringify(
-                page.elements.map((el) => ({
-                  ...el,
-                  id: uuidv4(),
-                })),
+                (JSON.parse(JSON.stringify(page.elements)) as Element[]).map(
+                  assignNewElementIds,
+                ),
               ),
             ),
           }))
