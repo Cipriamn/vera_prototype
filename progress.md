@@ -128,6 +128,13 @@
   - **Market Gaps Identified**: 7 opportunities (AI content, mobile-first editing, collaboration, templates)
   - **Template Categories**: 5 verticals (Student, Sports, Housing, Cultural, Alumni)
   - **MVP Roadmap**: 4-phase implementation plan with 28 total elements
+- 2026-04-22 (Run ID: f832d4fc): **UPDATED** - Traced watermarks to identify actual website builders:
+  - antibarbari.nl → **VoetbalAssist** (37 modules, sports clubs, €2/member/year)
+  - cedonulli.nl → **Genkgo/Verenigingenweb** (200+ clients, template/custom design)
+  - dizkartes.nl → **Congressus** (student associations, API + webhooks)
+  - congressus.nl marketing → **Webflow** (visual builder)
+  - Expanded feature matrix from 31 to 56+ elements
+  - Added VoetbalAssist sports-specific modules (match details, live feed, formations, etc.)
 
 ## Tech Researcher (Run ID: baf998ff)
 

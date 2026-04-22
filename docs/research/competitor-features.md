@@ -44,57 +44,73 @@
 
 ## Feature Matrix: Droppable Elements by Competitor
 
-| Element Category | Congressus | Genkgo | Cedo Nulli | Antibarbari | Dizkartes | Industry Standard |
-|-----------------|:----------:|:------:|:----------:|:-----------:|:---------:|:-----------------:|
+> **Note:** The columns below represent the **builder platforms** these sites use, not the sites themselves:
+> - Congressus (marketing site) uses Webflow; Dizkartes uses Congressus builder
+> - Cedo Nulli uses Genkgo/Verenigingenweb
+> - Antibarbari uses VoetbalAssist
+
+| Element Category | Congressus | Genkgo | VoetbalAssist | Webflow | Industry Standard |
+|-----------------|:----------:|:------:|:-------------:|:-------:|:-----------------:|
 | **Content Blocks** |
-| Text/Rich Text | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Heading Blocks | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Image | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Video Embed | ✓ | ✓ | - | - | - | ✓ |
-| Photo Gallery | ✓ | ✓ | ✓ | - | - | ✓ |
+| Text/Rich Text | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Heading Blocks | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Image | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Video Embed | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Photo Gallery | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Navigation** |
-| Header/Navbar | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Footer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Dropdown Menus | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Sidebar Menu | - | - | - | ✓ | - | ✓ |
-| Breadcrumbs | - | - | - | ✓ | - | ✓ |
+| Header/Navbar | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Footer | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Dropdown Menus | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Sidebar Menu | - | - | ✓ | ✓ | ✓ |
+| Breadcrumbs | - | - | ✓ | ✓ | ✓ |
 | **Hero/Landing** |
-| Hero Section | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| CTA Buttons | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Banner/Announcement | ✓ | ✓ | ✓ | ✓ | - | ✓ |
+| Hero Section | ✓ | ✓ | ✓ | ✓ | ✓ |
+| CTA Buttons | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Banner/Announcement | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Statistics/Social Proof** |
-| Stats Counter | - | - | ✓ | - | ✓ | ✓ |
-| Member Count Display | ✓ | ✓ | ✓ | - | - | ✓ |
-| Testimonials | - | ✓ | - | - | - | ✓ |
+| Stats Counter | - | - | ✓ | ✓ | ✓ |
+| Member Count Display | ✓ | ✓ | ✓ | - | ✓ |
+| Testimonials | - | ✓ | - | ✓ | ✓ |
 | **Member Features** |
-| Member Login | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Member Portal | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Member Directory | ✓ | ✓ | - | - | - | ✓ |
-| Profile Cards | ✓ | ✓ | - | - | - | ✓ |
+| Member Login | ✓ | ✓ | ✓ | - | ✓ |
+| Member Portal | ✓ | ✓ | ✓ | - | ✓ |
+| Member Directory | ✓ | ✓ | ✓ | - | ✓ |
+| Profile Cards | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Events** |
-| Event List/Grid | ✓ | ✓ | ✓ | - | - | ✓ |
-| Event Calendar | ✓ | ✓ | ✓ | - | - | ✓ |
-| Event Registration | ✓ | ✓ | ✓ | - | - | ✓ |
-| Ticket Sales | ✓ | ✓ | ✓ | - | - | ✓ |
+| Event List/Grid | ✓ | ✓ | ✓ | - | ✓ |
+| Event Calendar | ✓ | ✓ | ✓ | - | ✓ |
+| Event Registration | ✓ | ✓ | ✓ | - | ✓ |
+| Ticket Sales | ✓ | ✓ | ✓ | - | ✓ |
 | **Content Feeds** |
-| News/Blog Section | ✓ | ✓ | ✓ | - | ✓ | ✓ |
-| Instagram Feed | - | - | ✓ | - | - | ✓ |
-| Social Media Links | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| News/Blog Section | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Instagram Feed | - | - | ✓ | ✓ | ✓ |
+| Social Media Links | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Forms** |
-| Contact Form | ✓ | ✓ | ✓ | - | ✓ | ✓ |
-| Registration Form | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Survey/Feedback | ✓ | ✓ | ✓ | - | - | ✓ |
+| Contact Form | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Registration Form | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Survey/Feedback | ✓ | ✓ | ✓ | - | ✓ |
+| Poll Widget | - | - | ✓ | - | ✓ |
 | **Commerce** |
-| Webshop | ✓ | ✓ | - | - | - | ✓ |
-| Payment Integration | ✓ | ✓ | ✓ | - | - | ✓ |
-| Sponsor Logos | - | - | - | ✓ | ✓ | ✓ |
+| Webshop | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Payment Integration | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Sponsor Logos | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Crowdfunding Widget | - | - | ✓ | - | - |
 | **Organization** |
-| Committee/Team Listings | ✓ | ✓ | ✓ | ✓ | ✓ | - |
-| Group Pages | ✓ | ✓ | ✓ | ✓ | ✓ | - |
-| Office Hours/Status | - | - | ✓ | - | - | - |
+| Committee/Team Listings | ✓ | ✓ | ✓ | - | - |
+| Group Pages | ✓ | ✓ | ✓ | - | - |
+| Office Hours/Status | - | - | - | - | - |
+| Vacancy Listings | - | ✓ | ✓ | - | ✓ |
 | **Communication** |
-| Newsletter Signup | ✓ | ✓ | - | - | - | ✓ |
-| SMS Integration | ✓ | - | - | - | - | - |
+| Newsletter Signup | ✓ | ✓ | ✓ | ✓ | ✓ |
+| SMS Integration | ✓ | - | - | - | - |
+| Forum/Discussion | - | ✓ | ✓ | - | ✓ |
+| **Sports-Specific (VoetbalAssist)** |
+| Match Details Widget | - | - | ✓ | - | - |
+| Live Match Feed | - | - | ✓ | - | - |
+| Team Lineup/Formation | - | - | ✓ | - | - |
+| Top Scorers List | - | - | ✓ | - | - |
+| Tournament Bracket | - | - | ✓ | - | - |
+| Training Schedule | - | - | ✓ | - | - |
 
 ---
 
