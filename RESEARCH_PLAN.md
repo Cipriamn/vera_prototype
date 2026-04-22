@@ -209,3 +209,69 @@ Privacy is core to Vera Connect - this must not be an afterthought.
 3. Is real-time collaboration (multiple editors) a requirement?
 4. Should published sites be static HTML or server-rendered?
 5. Integration timeline with Vera Connect main app?
+
+---
+
+## Research Lead Status
+
+**Last Updated**: 2026-04-20 11:48 UTC
+
+### Completed Tasks
+- [x] Read and analyzed proposal.md - understood project scope (website builder for Vera Connect)
+- [x] Explored project structure - identified monorepo with web/server/shared packages
+- [x] Documented current backend (Express.js + Prisma) and migration target (Python)
+- [x] Identified key requirements: DnD editor, templates, domain mgmt, AI generation, GDPR
+- [x] Formulated research questions for each downstream researcher (see sections above)
+- [x] Updated Global Notes with constraints
+
+### Key Findings
+1. **Current Stack**: React + TypeScript frontend with @dnd-kit, Express backend with Prisma/PostgreSQL
+2. **Migration Scope**: Backend only - frontend stays React
+3. **Core Features Needed**:
+   - Enhanced DnD builder (consider GrapesJS/Craft.js)
+   - Domain registration + DNS automation
+   - AI page generation from prompts
+   - GDPR-compliant form handling
+4. **Python Backend Candidates**: FastAPI (recommended for async), Django, Flask
+
+### Ready for Downstream Researchers
+Each researcher has specific questions assigned above. The research plan is COMPLETE.
+Waiting for DnD, Domain & Hosting, and AI & Privacy researchers to contribute findings.
+
+### Next Step (Research Lead)
+After all researchers complete their sections, I will synthesize into RESEARCH_REPORT.md with final recommendations.
+
+---
+
+## DnD Library Researcher Status
+
+**Last Updated**: 2026-04-20 12:15 UTC
+**Status**: ✅ COMPLETE
+
+### Completed Tasks
+- [x] Researched DnD libraries: dnd-kit, GrapesJS, Craft.js, Puck, Builder.io, Plasmic
+- [x] Researched Python backend frameworks: FastAPI, Django, Flask
+- [x] Researched ORMs: SQLAlchemy 2.0 vs Django ORM
+- [x] Created comparison matrices for all options
+- [x] Documented migration strategy from Express.js to FastAPI
+- [x] Wrote comprehensive report: RESEARCH_DND_LIBRARIES.md
+
+### Key Recommendations
+
+**Frontend (DnD Library)**:
+- **Primary: Puck** - Ready-to-use UI, AI support built-in, MIT license, uses dnd-kit internally
+- Alternative: Keep dnd-kit if maximum customization needed
+- Avoid: GrapesJS (too heavy), Builder.io/Plasmic (proprietary)
+
+**Backend (Python)**:
+- **Primary: FastAPI + SQLAlchemy 2.0 + Alembic**
+- Async-first design critical for AI/LLM integrations
+- Pydantic v2 for TypeScript-like type safety
+- 7x faster than Flask, better async than Django
+
+**React Native Note**:
+- No open-source DnD library supports React Native
+- Consider web-based editor with RN app wrapper, or Builder.io for native (proprietary)
+
+### Deliverables
+- `RESEARCH_DND_LIBRARIES.md` - Full comparison matrix and recommendations

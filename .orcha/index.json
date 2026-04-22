@@ -1,0 +1,313 @@
+{
+  "repo_path": "/Users/ciprian/Desktop/Munca/vera_prototype",
+  "indexed_at": "2026-04-20T08:55:46.493965",
+  "total_files": 55,
+  "directories": [
+    "packages",
+    "packages/server",
+    "packages/server/prisma",
+    "packages/server/prisma/migrations",
+    "packages/server/prisma/migrations/20260329085538_vera_init",
+    "packages/server/src",
+    "packages/server/src/controllers",
+    "packages/server/src/data",
+    "packages/server/src/middleware",
+    "packages/server/src/routes",
+    "packages/server/src/services",
+    "packages/server/src/utils",
+    "packages/server/uploads",
+    "packages/shared",
+    "packages/shared/src",
+    "packages/shared/src/types",
+    "packages/web",
+    "packages/web/public",
+    "packages/web/src",
+    "packages/web/src/components",
+    "packages/web/src/components/builder",
+    "packages/web/src/components/elements",
+    "packages/web/src/components/preview",
+    "packages/web/src/components/ui",
+    "packages/web/src/hooks",
+    "packages/web/src/pages",
+    "packages/web/src/stores",
+    "packages/web/src/types",
+    "packages/web/src/utils"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "extension": ".md",
+      "size_bytes": 3421
+    },
+    {
+      "path": "package-lock.json",
+      "extension": ".json",
+      "size_bytes": 223612
+    },
+    {
+      "path": "package.json",
+      "extension": ".json",
+      "size_bytes": 614
+    },
+    {
+      "path": "packages/web/tsconfig.node.json",
+      "extension": ".json",
+      "size_bytes": 233
+    },
+    {
+      "path": "packages/web/index.html",
+      "extension": ".html",
+      "size_bytes": 619
+    },
+    {
+      "path": "packages/web/tailwind.config.js",
+      "extension": ".js",
+      "size_bytes": 582
+    },
+    {
+      "path": "packages/web/package.json",
+      "extension": ".json",
+      "size_bytes": 1148
+    },
+    {
+      "path": "packages/web/tsconfig.json",
+      "extension": ".json",
+      "size_bytes": 629
+    },
+    {
+      "path": "packages/web/vite.config.ts",
+      "extension": ".ts",
+      "size_bytes": 391
+    },
+    {
+      "path": "packages/web/postcss.config.js",
+      "extension": ".js",
+      "size_bytes": 80
+    },
+    {
+      "path": "packages/web/src/App.tsx",
+      "extension": ".tsx",
+      "size_bytes": 2027
+    },
+    {
+      "path": "packages/web/src/main.tsx",
+      "extension": ".tsx",
+      "size_bytes": 329
+    },
+    {
+      "path": "packages/web/src/index.css",
+      "extension": ".css",
+      "size_bytes": 957
+    },
+    {
+      "path": "packages/web/src/stores/authStore.ts",
+      "extension": ".ts",
+      "size_bytes": 2513
+    },
+    {
+      "path": "packages/web/src/stores/builderStore.ts",
+      "extension": ".ts",
+      "size_bytes": 8228
+    },
+    {
+      "path": "packages/web/src/utils/api.ts",
+      "extension": ".ts",
+      "size_bytes": 1240
+    },
+    {
+      "path": "packages/web/src/components/elements/ColumnLayout.tsx",
+      "extension": ".tsx",
+      "size_bytes": 1089
+    },
+    {
+      "path": "packages/web/src/components/elements/ImageBlock.tsx",
+      "extension": ".tsx",
+      "size_bytes": 2210
+    },
+    {
+      "path": "packages/web/src/components/elements/GridLayout.tsx",
+      "extension": ".tsx",
+      "size_bytes": 1126
+    },
+    {
+      "path": "packages/web/src/components/elements/VideoBlock.tsx",
+      "extension": ".tsx",
+      "size_bytes": 3034
+    },
+    {
+      "path": "packages/web/src/components/elements/TextBlock.tsx",
+      "extension": ".tsx",
+      "size_bytes": 1625
+    },
+    {
+      "path": "packages/web/src/components/elements/ButtonBlock.tsx",
+      "extension": ".tsx",
+      "size_bytes": 1924
+    },
+    {
+      "path": "packages/web/src/components/preview/ElementRenderer.tsx",
+      "extension": ".tsx",
+      "size_bytes": 8035
+    },
+    {
+      "path": "packages/web/src/components/builder/PropertyPanel.tsx",
+      "extension": ".tsx",
+      "size_bytes": 22254
+    },
+    {
+      "path": "packages/web/src/components/builder/Toolbar.tsx",
+      "extension": ".tsx",
+      "size_bytes": 8070
+    },
+    {
+      "path": "packages/web/src/components/builder/Sidebar.tsx",
+      "extension": ".tsx",
+      "size_bytes": 4949
+    },
+    {
+      "path": "packages/web/src/components/builder/Canvas.tsx",
+      "extension": ".tsx",
+      "size_bytes": 2746
+    },
+    {
+      "path": "packages/web/src/components/builder/ElementWrapper.tsx",
+      "extension": ".tsx",
+      "size_bytes": 2117
+    },
+    {
+      "path": "packages/web/src/pages/Login.tsx",
+      "extension": ".tsx",
+      "size_bytes": 3508
+    },
+    {
+      "path": "packages/web/src/pages/Dashboard.tsx",
+      "extension": ".tsx",
+      "size_bytes": 8996
+    },
+    {
+      "path": "packages/web/src/pages/Preview.tsx",
+      "extension": ".tsx",
+      "size_bytes": 3759
+    },
+    {
+      "path": "packages/web/src/pages/Register.tsx",
+      "extension": ".tsx",
+      "size_bytes": 5407
+    },
+    {
+      "path": "packages/web/src/pages/Builder.tsx",
+      "extension": ".tsx",
+      "size_bytes": 5675
+    },
+    {
+      "path": "packages/server/package.json",
+      "extension": ".json",
+      "size_bytes": 994
+    },
+    {
+      "path": "packages/server/tsconfig.json",
+      "extension": ".json",
+      "size_bytes": 575
+    },
+    {
+      "path": "packages/server/prisma/migrations/migration_lock.toml",
+      "extension": ".toml",
+      "size_bytes": 126
+    },
+    {
+      "path": "packages/server/src/index.ts",
+      "extension": ".ts",
+      "size_bytes": 1540
+    },
+    {
+      "path": "packages/server/src/middleware/errorHandler.ts",
+      "extension": ".ts",
+      "size_bytes": 1414
+    },
+    {
+      "path": "packages/server/src/middleware/auth.ts",
+      "extension": ".ts",
+      "size_bytes": 886
+    },
+    {
+      "path": "packages/server/src/utils/jwt.ts",
+      "extension": ".ts",
+      "size_bytes": 780
+    },
+    {
+      "path": "packages/server/src/utils/slug.ts",
+      "extension": ".ts",
+      "size_bytes": 398
+    },
+    {
+      "path": "packages/server/src/data/templates.ts",
+      "extension": ".ts",
+      "size_bytes": 15822
+    },
+    {
+      "path": "packages/server/src/routes/sites.ts",
+      "extension": ".ts",
+      "size_bytes": 7649
+    },
+    {
+      "path": "packages/server/src/routes/pages.ts",
+      "extension": ".ts",
+      "size_bytes": 7103
+    },
+    {
+      "path": "packages/server/src/routes/templates.ts",
+      "extension": ".ts",
+      "size_bytes": 909
+    },
+    {
+      "path": "packages/server/src/routes/upload.ts",
+      "extension": ".ts",
+      "size_bytes": 1756
+    },
+    {
+      "path": "packages/server/src/routes/public.ts",
+      "extension": ".ts",
+      "size_bytes": 2549
+    },
+    {
+      "path": "packages/server/src/routes/auth.ts",
+      "extension": ".ts",
+      "size_bytes": 4929
+    },
+    {
+      "path": "packages/shared/package.json",
+      "extension": ".json",
+      "size_bytes": 182
+    },
+    {
+      "path": "packages/shared/tsconfig.json",
+      "extension": ".json",
+      "size_bytes": 373
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "extension": ".ts",
+      "size_bytes": 123
+    },
+    {
+      "path": "packages/shared/src/types/site.ts",
+      "extension": ".ts",
+      "size_bytes": 1460
+    },
+    {
+      "path": "packages/shared/src/types/api.ts",
+      "extension": ".ts",
+      "size_bytes": 356
+    },
+    {
+      "path": "packages/shared/src/types/elements.ts",
+      "extension": ".ts",
+      "size_bytes": 3766
+    },
+    {
+      "path": "packages/shared/src/types/auth.ts",
+      "extension": ".ts",
+      "size_bytes": 536
+    }
+  ]
+}

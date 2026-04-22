@@ -37,3 +37,6 @@ packages/server/prisma/migrations/*
 
 # TypeScript
 *.tsbuildinfo
+
+# Orcha group files (ephemeral, never committed)
+.orcha/groups/

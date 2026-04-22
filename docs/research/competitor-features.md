@@ -8,15 +8,34 @@
 
 ## Competitors Analyzed
 
-### Dutch Association Platforms
-1. **Congressus.nl** - Association management + website builder
-2. **Genkgo.nl** - Community software for associations, clubs, unions
-3. **Verenigingenweb.nl** - Association website builder
+### Website Builder Platforms (Identified via watermark/attribution tracing)
 
-### Live Association Websites (Built with these platforms)
-4. **Cedo Nulli** (cedonulli.nl) - Student association, Faculty of Social Sciences
-5. **RSV Antibarbari** (antibarbari.nl) - Sports club (rugby)
-6. **A.S.V. Dizkartes** (dizkartes.nl) - Large student association
+| Example Site | Builder Platform | Platform Type |
+|--------------|------------------|---------------|
+| antibarbari.nl | **VoetbalAssist** | Sports club SaaS (350+ clubs) |
+| cedonulli.nl | **Genkgo/Verenigingenweb** | Association SaaS (700+ orgs) |
+| dizkartes.nl | **Congressus** | Student association SaaS |
+| congressus.nl | **Webflow** (marketing site only) | Visual builder |
+| genkgo.nl | **Genkgo** (own platform) | Association SaaS |
+| verenigingenweb.nl | **Genkgo** | Association SaaS |
+
+### Dutch Association Builder Platforms
+1. **Congressus** - Student/general association management + website builder
+   - API + webhooks + OAuth for custom integrations
+   - Partners with GeK for custom designs
+   - Custom CSS support
+2. **Genkgo/Verenigingenweb** - Community software for associations, clubs, unions
+   - Two paths: Template-based or Custom design
+   - Dutch GDPR-compliant hosting
+   - 700+ organizations served
+3. **VoetbalAssist** - Sports club SaaS (football/rugby focus)
+   - KNVB data integration (Dutch Football Association)
+   - Real-time match/standings sync via `site-api.voetbalassist.nl`
+   - **37 customizable modules** including:
+     - ClubWebsite, ClubApp, ClubTV/Narrowcasting, VeldTV (livestreaming)
+     - Player Tracking System, sponsorship management, ticket sales
+     - Crowdfunding, volunteer management, financial tools
+   - Pricing: ~€2/member/year
 
 ### Industry Leaders (Reference)
 - Wix, Squarespace, Webflow, WildApricot, Mobirise
@@ -134,7 +153,17 @@ Requires significant backend logic or third-party integrations.
 | 28 | **Newsletter Signup** | Email collection + integration | Congressus, Genkgo |
 | 29 | **Member Portal Link** | SSO to member area | Congressus, Genkgo |
 | 30 | **Office Status Widget** | Open/closed indicator | Cedo Nulli |
-| 31 | **Attendance/Bar Duty** | Scheduling widget | Antibarbari |
+| 31 | **Attendance/Bar Duty** | Scheduling widget | Antibarbari (VoetbalAssist) |
+| 32 | **Match Details Widget** | Reports, photos, scorers, cards | VoetbalAssist |
+| 33 | **Live Match Feed** | Liveblog with real-time updates | VoetbalAssist |
+| 34 | **Team Lineup/Formation** | Visual formation display | VoetbalAssist |
+| 35 | **Top Scorers List** | Player statistics display | VoetbalAssist |
+| 36 | **Crowdfunding Goal** | Progress tracker for fundraising | VoetbalAssist |
+| 37 | **Tournament Bracket** | Bracket/knockout visualization | VoetbalAssist |
+| 38 | **Vacancy Listing** | Job/volunteer positions with QR | VoetbalAssist |
+| 39 | **Poll/Survey Widget** | Interactive voting element | VoetbalAssist |
+| 40 | **Birthday Display** | GDPR-compliant member birthdays | VoetbalAssist |
+| 41 | **Buy/Sell Classifieds** | Marketplace section | VoetbalAssist |
 
 ---
 
@@ -255,13 +284,21 @@ Based on frequency across competitors and feasibility:
 
 ## Sources
 
-- https://www.congressus.nl
-- https://www.congressus.nl/features/website
-- https://www.genkgo.nl/en
-- https://verenigingenweb.nl/nl
-- https://www.cedonulli.nl
-- https://www.antibarbari.nl
-- https://www.dizkartes.nl/home
+### Builder Platforms (Primary Research)
+- https://www.congressus.nl - Association management platform
+- https://www.congressus.nl/verenigingswebsite - Website builder features
+- https://support.congressus.nl/nl/articles/2781235-introductie-congressus-api - API documentation
+- https://www.genkgo.nl/en - Community management platform
+- https://verenigingenweb.nl/nl - Template vs custom design options
+- https://www.voetbalassist.nl - Sports club platform (VoetbalAssist)
+- https://www.voetbalassist.nl/faq/ - KNVB Dataservice API details
+
+### Example Sites Analyzed (for element identification)
+- https://www.cedonulli.nl (built on Genkgo/Verenigingenweb)
+- https://www.antibarbari.nl (built on VoetbalAssist)
+- https://www.dizkartes.nl/home (built on Congressus)
+
+### Industry Reference
 - Wix.com drag-and-drop documentation
 - Squarespace, Webflow comparison articles (2024-2026)
 - WildApricot association website best practices

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "Brave Search": {
+      "command": "python3",
+      "args": [
+        "/Users/ciprian/Desktop/Munca/NightCity/desktop/release/mac-arm64/Orcha.app/Contents/Resources/mcp-bridge/mcp_stdio_bridge.py",
+        "--server-id",
+        "2adab34a-3242-420d-aca2-b806abdd8255",
+        "--port",
+        "52140"
+      ]
+    }
+  }
+}

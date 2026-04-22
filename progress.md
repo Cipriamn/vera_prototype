@@ -149,3 +149,33 @@
   - **Security Considerations**: XSS prevention, CAPTCHA, PCI compliance strategies
   - **Performance Benchmarks**: Core Web Vitals targets and optimization strategies
   - **Implementation Priority Matrix**: Value vs. complexity visualization for roadmap planning
+
+- 2026-04-22 (Run ID: f832d4fc): **CORRECTED PLATFORM ATTRIBUTION** via watermark tracing:
+  - Created docs/research/tech-feasibility-analysis.md with corrected builder identification
+  - Updated docs/research/competitor-features.md with accurate platform mapping:
+    - antibarbari.nl → **VoetbalAssist** (sports club SaaS, KNVB integration)
+    - cedonulli.nl → **Genkgo/Verenigingenweb** (association SaaS)
+    - dizkartes.nl → **Congressus** (student association platform)
+  - Documented VoetbalAssist API: `site-api.voetbalassist.nl` for real-time sports data
+  - Added Congressus API/OAuth/webhook capabilities
+  - Added Genkgo template vs custom design paths
+
+## Synthesizer (Run ID: baf998ff)
+
+### Checklist
+
+- [x] Wait for Feature Analyst and Tech Researcher to complete their analyses
+- [x] Merge competitor element findings with feasibility assessments
+- [x] Create unified list of droppable elements as functional requirements
+- [x] Sort the list by feasibility (most feasible first)
+- [x] Format final deliverable as clear functional requirements document
+
+### Agent Updates
+
+- 2026-04-22: Completed docs/research/RECOMMENDATIONS.md with:
+  - **Executive Summary**: Top 10 MVP components + 5 key differentiators vs competitors
+  - **Priority Matrix**: P0 (10 elements, 22 days), P1 (8 elements, 28 days), P2 (10 elements, 112 days)
+  - **Tech Stack Decisions**: Craft.js for DnD, Cloudflare for DNS/hosting, Claude for AI, Mollie for payments
+  - **Risk Analysis**: 5 technical risks, 4 competitive risks, 3 business risks with mitigations
+  - **Implementation Roadmap**: 12-week plan with weekly milestones
+  - **Success Metrics**: 50 associations, 500 pages, <30 min build time, NPS >40
