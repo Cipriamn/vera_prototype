@@ -175,3 +175,216 @@ This section contains 10 academic papers/research relevant to the Vera Connect w
 2. Extract findings relevant to the Vera Connect proposal requirements
 3. Append your analysis to this notes.md file under a new section
 4. Note specific recommendations with citations
+
+---
+
+# DnD Library Researcher Findings
+
+**Added: 2026-04-22**
+
+## Paper Analysis (Papers 1-4)
+
+### Paper 1: Low-Code Programming Models (CACM)
+
+**Key Findings:**
+- Visual programming democratizes software development for non-technical users
+- 80% of tech products will be built by "citizen developers" by 2024 (Gartner)
+- 70% of users with no prior experience learned low-code in ≤1 month
+- Low-code can reduce development time by 50-90% (Forrester 2024)
+- The trend is evolving toward **agentic AI** where users orchestrate AI agents via natural language
+
+**Application to Vera Connect:**
+- Visual drag-and-drop approach is validated for target user base (associations, student houses)
+- Pre-built component libraries accelerate development
+- Consider hybrid approach: visual + AI-assisted
+
+### Paper 2: The Rise of No/Low Code Software Development (ResearchGate)
+
+**Key Findings - Security:**
+- Most frequent vulnerabilities: **code injection, XSS, insecure APIs**
+- Information security risks: weak encryption, data breaches, misconfigurations
+- Shadow IT risk when non-technical users create apps without IT oversight
+- OWASP Low-Code/No-Code Top 10 provides security checklist
+
+**Mitigation Strategies:**
+- Request SBOM (Software Bill of Materials) from vendors
+- Implement SAST/DAST scanning
+- Create inventory of all LCNC apps
+- Provide citizen developers with clear remediation instructions
+
+**Application to Vera Connect:**
+- Security-first design critical for GDPR compliance
+- Need automated security scanning for user-generated sites
+- Content moderation system aligns with security requirements
+
+### Paper 3: Combining Low-Code with ChatGPT (ScienceDirect)
+
+**Key Findings:**
+- LLMs effective for problem-solving, code generation, and code repair
+- AI can fully automate low-code pipeline instructions
+- Microsoft's Low-code LLM framework: 6 types of visual programming interactions
+- Users prefer clicking, dragging, or text editing over prompt engineering
+
+**Application to Vera Connect:**
+- AI page generation feature well-validated by research
+- Combine visual drag-and-drop with LLM assistance
+- Use AI to generate initial page structure, then visual refinement
+
+### Paper 4: AI Chatbot Enhancing LCNC Accessibility (Springer)
+
+**Key Findings (n=26 user study):**
+- **SUS scores significantly higher** with AI chatbot (p = .03)
+- Task completion **faster** (p<.001)
+- **Fewer errors** (p<.001)
+- Less external help needed (p<.001)
+- Most users preferred **hybrid approach** (visual + AI)
+- Some experienced users eventually preferred visual builder alone
+
+**Application to Vera Connect:**
+- Strong empirical support for AI-assisted building
+- Implement AI chatbot for guidance, not replacement
+- Allow toggle between AI-assisted and pure visual modes
+
+---
+
+## Drag-and-Drop Library Comparison Matrix
+
+| Library | React Native | License | Learning Curve | Maintenance | Best For |
+|---------|-------------|---------|----------------|-------------|----------|
+| **Puck** | ❌ | MIT | Low | Active (v0.21) | Full page builder, AI built-in |
+| **dnd-kit** | ❌ | MIT | Medium | Active | Low-level DnD primitives |
+| **GrapesJS** | ❌ | BSD-3 | High | Active | Full HTML template builder |
+| **Craft.js** | ❌ | MIT | Medium | Moderate | React page editors |
+| **Builder.io** | ✅ (Native SDK) | Proprietary | Low | Active | Enterprise, CMS |
+| **Plasmic** | ❌ | Proprietary | Medium | Active | Design-to-code |
+
+### Detailed Library Analysis
+
+#### 1. Puck (⭐ PRIMARY RECOMMENDATION)
+- **GitHub**: 6,800+ stars, active development
+- **Pros**:
+  - Ready-to-use UI out of box
+  - Built-in AI page generation (v0.21)
+  - Uses dnd-kit internally (proven DnD)
+  - MIT licensed, no vendor lock-in
+  - Plugin system, Tailwind v4 support
+  - Strong React ecosystem support
+- **Cons**:
+  - No React Native support
+  - Smaller community than GrapesJS
+- **Source**: [Puck GitHub](https://github.com/puckeditor/puck)
+
+#### 2. dnd-kit (KEEP CURRENT)
+- **Downloads**: 12M+ weekly
+- **Performance**: Best in class
+  - Maintains 60fps with 1,000 draggable items
+  - ~10kb core, no external dependencies
+  - Uses GPU-accelerated transforms
+- **Pros**:
+  - Already in use in project
+  - Excellent accessibility (keyboard, screen readers)
+  - Multiple input methods (pointer, touch, keyboard)
+- **Cons**:
+  - Low-level - requires building UI layer
+  - No file drag-from-desktop support
+- **Source**: [dnd-kit](https://dndkit.com/)
+
+#### 3. GrapesJS
+- **GitHub**: 25,695 stars, 140K weekly downloads
+- **Pros**:
+  - Most mature open-source option
+  - Extensive plugin ecosystem
+  - Multi-purpose (emails, sites, mobile)
+- **Cons**:
+  - Framework-agnostic (React wrapper available)
+  - Steep learning curve
+  - Requires custom UI build
+- **Source**: [GrapesJS GitHub](https://github.com/GrapesJS/grapesjs)
+
+#### 4. Craft.js
+- **Pros**:
+  - Native React framework
+  - Modular architecture
+  - Inspired by GrapesJS but simpler
+  - MIT licensed
+- **Cons**:
+  - Less active development than alternatives
+  - Smaller ecosystem
+- **Source**: [Craft.js GitHub](https://github.com/prevwong/craft.js/)
+
+#### 5. Builder.io (Commercial)
+- **Pricing**: From $199/month
+- **Pros**:
+  - **Only option with React Native SDK**
+  - Native Swift/SwiftUI/Kotlin support
+  - Built-in CMS and hosting
+  - AI-powered design features
+- **Cons**:
+  - Proprietary, vendor lock-in risk
+  - Higher cost
+- **Source**: [Builder.io](https://www.builder.io/)
+
+#### 6. Plasmic (Commercial)
+- **Pricing**: From $10/user/month
+- **Pros**:
+  - Code export (zero lock-in possible)
+  - Figma-like design experience
+  - Incremental adoption
+- **Cons**:
+  - No React Native support
+  - Proprietary
+  - More complex than Builder.io
+- **Source**: [Plasmic](https://www.plasmic.app/)
+
+---
+
+## React Native Compatibility Summary
+
+**Critical Finding**: No open-source DnD library supports React Native out of the box.
+
+**Options for Mobile Support:**
+1. **Builder.io Native SDK** - Only drag-and-drop solution with native iOS/Android support
+2. **WebView wrapper** - Embed web-based editor in React Native WebView
+3. **Separate mobile viewer** - Build-only on web, view on mobile (recommended for Vera Connect)
+
+---
+
+## Recommendations for Vera Connect
+
+### Primary Stack Recommendation
+
+| Layer | Tool | Rationale |
+|-------|------|-----------|
+| DnD Engine | **dnd-kit** (keep) | Already integrated, best performance |
+| Page Builder | **Puck** | Ready UI, AI built-in, uses dnd-kit, MIT |
+| Mobile Strategy | Web editor + RN viewer | No viable RN editor exists open-source |
+
+### Why Puck Over Alternatives?
+
+1. **Ready-to-use UI** vs GrapesJS/Craft.js requiring UI from scratch
+2. **AI page generation built-in** (v0.21) aligns with proposal requirements
+3. **MIT license** avoids vendor lock-in (vs Builder.io/Plasmic)
+4. **Uses dnd-kit internally** - consistent with current stack
+5. **Active development** with modern React patterns
+
+### Migration Path from Current Setup
+
+1. Keep dnd-kit for low-level interactions
+2. Add Puck for complete page builder experience
+3. Customize Puck components to match Vera Connect design system
+4. Integrate AI generation with OpenRouter/Claude API
+
+---
+
+## Sources
+
+- [SAP Low-Code/No-Code Guide](https://www.sap.com/products/technology-platform/build/what-is-low-code-no-code.html)
+- [Low-Code Security Concerns - CSO Online](https://www.csoonline.com/article/572021/4-security-concerns-for-low-code-and-no-code-development-2.html)
+- [ResearchGate: Rise of No/Low Code](https://www.researchgate.net/publication/342951159_The_Rise_of_NoLow_Code_Software_Development-No_Experience_Needed)
+- [ScienceDirect: LCNC Adoption Review](https://www.sciencedirect.com/science/article/abs/pii/S0164121224003443)
+- [Microsoft Low-code LLM Research](https://visualstudiomagazine.com/articles/2023/04/26/low-code-llms.aspx)
+- [Springer: AI Chatbot for LCNC](https://link.springer.com/chapter/10.1007/978-3-032-04999-5_12)
+- [Puck Top 5 DnD Libraries](https://puckeditor.com/blog/top-5-drag-and-drop-libraries-for-react)
+- [npm trends comparison](https://npmtrends.com/craft.js-vs-draft-js-vs-grapesjs-vs-react-web-editor)
+- [Plasmic vs Builder.io](https://www.plasmic.app/vs-builder-io)
+- [Builder.io Native SDK](https://www.builder.io/blog/native-mobile-sdks)
