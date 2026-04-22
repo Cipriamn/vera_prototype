@@ -48,16 +48,39 @@
 
 ### Checklist
 
-- [ ] Wait for Research Lead to provide context and research questions
-- [ ] Research Python libraries for D&D 5e SRD data (e.g., open5e, dnd5eapi bindings)
-- [ ] Evaluate Python packages for dice rolling and game mechanics
-- [ ] Compare library options by: maintenance status, documentation, feature coverage
-- [ ] Document recommended libraries with rationale
-- [ ] Note any licensing considerations
+- [x] Wait for Research Lead to provide context and research questions
+- [x] Review assigned papers 1-4 (low-code/no-code, visual programming, AI-assisted builders)
+- [x] Research drag-and-drop editor libraries (Puck, GrapesJS, Craft.js, dnd-kit, Editor.js)
+- [x] Compare library options by: React Native support, license, learning curve, maintenance
+- [x] Document React Native compatibility findings
+- [x] Evaluate commercial options (Builder.io, Plasmic) for comparison
+- [x] Document recommended libraries with rationale in notes.md
 
 ### Agent Updates
 
-- (append-only log)
+- 2026-04-22 (Run ID: 6f732846-2f5c-43c2-a8e6-322e72745a43): **COMPLETED** - Full DnD library research added to docs/research/notes.md:
+
+  **Paper Analysis (Papers 1-4):**
+  - Paper 1: 70% of non-technical users learn low-code in ≤1 month; 50-90% dev time reduction
+  - Paper 2: Security risks (XSS, code injection, insecure APIs) require SBOM + SAST/DAST scanning
+  - Paper 3: Microsoft's Low-code LLM: 6 visual interaction types for controllable AI responses
+  - Paper 4: AI chatbot improved SUS scores (p=.03), faster task completion (p<.001), fewer errors (p<.001)
+
+  **Library Recommendations:**
+  - **PRIMARY**: Puck (MIT, ready UI, AI page gen built-in, uses dnd-kit internally)
+  - **KEEP**: dnd-kit (already integrated, 60fps w/ 1,000 items, 10kb core)
+  - **AVOID**: GrapesJS (steep learning curve), Builder.io/Plasmic (proprietary, vendor lock-in)
+
+  **Critical Finding - React Native:**
+  - NO open-source DnD library supports React Native
+  - Builder.io is only option with native iOS/Android SDK ($199+/mo)
+  - Recommendation: Web editor + React Native viewer (separate apps)
+
+  **Migration Path:**
+  1. Keep dnd-kit for low-level interactions
+  2. Add Puck for complete page builder experience
+  3. Customize Puck components to match Vera Connect design system
+  4. Integrate AI generation with OpenRouter/Claude API
 
 ## Domain & Hosting Researcher
 
@@ -80,6 +103,17 @@
   - **SSL Automation**: Cloudflare for SaaS handles automatic provisioning
   - **Cost Projections**: ~$300/month for 1,000 sites, ~$1,500/month for 10,000 sites
   - Alternative AWS architecture documented for teams with AWS expertise
+
+- 2026-04-22 (Run ID: 6f732846): **UPDATED** with research paper analysis + expanded hosting comparison:
+  - Reviewed assigned Papers 5-7 from Research Lead (GDPR cloud architecture, Python frameworks, LCSD challenges)
+  - **Paper 5 Insights**: GDPR sticky policies architecture, EU hosting mandatory, audit logging essential
+  - **Paper 6 Insights**: FastAPI confirmed fastest (async), Django slower due to abstraction
+  - **Paper 7 Insights**: SSL config (1.8%), CI/CD (1.9%), infrastructure API (3.2%) are top LCSD pain points
+  - Added Vercel multi-tenant SDK documentation (100K domains/project Pro, 1M Enterprise)
+  - Cost projections refined: ~$35/mo (100 users) → ~$125/mo (1K) → ~$440/mo (10K)
+  - Railway (Frankfurt) confirmed as primary Python backend host
+  - Multi-tenant architecture diagram added with Cloudflare → Railway flow
+  - GDPR compliance checklist added based on MDCT framework
 
 ## AI & Privacy Researcher
 
@@ -186,3 +220,8 @@
   - **Risk Analysis**: 5 technical risks, 4 competitive risks, 3 business risks with mitigations
   - **Implementation Roadmap**: 12-week plan with weekly milestones
   - **Success Metrics**: 50 associations, 500 pages, <30 min build time, NPS >40
+
+- 2026-04-22 (Run ID: f832d4fc): **VERIFIED** - Confirmed upstream research correctly traces watermarks to builders:
+  - RECOMMENDATIONS.md reflects correct platform attribution (VoetbalAssist, Congressus, Genkgo)
+  - All documents reference builders, not example sites
+  - No rewrite needed - documents were already corrected by upstream agents

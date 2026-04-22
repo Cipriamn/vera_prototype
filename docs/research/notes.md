@@ -388,3 +388,172 @@ This section contains 10 academic papers/research relevant to the Vera Connect w
 - [npm trends comparison](https://npmtrends.com/craft.js-vs-draft-js-vs-grapesjs-vs-react-web-editor)
 - [Plasmic vs Builder.io](https://www.plasmic.app/vs-builder-io)
 - [Builder.io Native SDK](https://www.builder.io/blog/native-mobile-sdks)
+
+---
+
+# Domain & Hosting Researcher Findings
+
+**Added: 2026-04-22**
+
+## Paper Analysis (Papers 5-7)
+
+### Paper 5: GDPR-Compliant Cloud Architecture (PMC11041943)
+
+**Key Findings:**
+
+The MDCT (Modeling Data Cloud Tracking) framework presents a model-driven approach to GDPR compliance using UML profiling and OCL validation.
+
+**Sticky Policies Architecture:**
+- Data carries machine-readable restrictions that travel with it
+- Five core fields: Permission, Owner, Purpose, Controller, AccessHistory
+- Critical for multi-tenant SaaS like Vera where user data spans multiple sites
+
+**GDPR Coverage for Hosting:**
+1. **Consent Management** - User withdrawal/modification per Article 7
+2. **Data Subject Rights** - Access, rectification, erasure, portability
+3. **Breach Notification** - 72-hour supervisory authority reporting (Article 33)
+4. **Purpose Limitation** - Distinguish statistical vs standard processing
+5. **Data Tracking** - Complete transparency on location/access/modifications
+
+**EU Hosting Implications:**
+- Use EU-approved codes of conduct (IaaS/SaaS)
+- Formal contracts required (Articles 13, 28, Recitals 44/109)
+- Granular permission systems essential
+- Comprehensive audit logs for regulatory inspection
+
+**Application to Vera Connect:**
+- Store all site data in EU regions (Frankfurt/Amsterdam)
+- Implement audit logging for all data access
+- Clear separation of data processor vs controller roles
+- Use Cloudflare EU regions for edge caching
+
+---
+
+### Paper 6: Python Framework Performance (IJSREM)
+
+**Key Findings:**
+
+| Framework | Strength | Performance | Best Use Case |
+|-----------|----------|-------------|---------------|
+| **FastAPI** | Async programming | Fastest | High-performance APIs, real-time |
+| **Flask** | Lightweight, flexible | Medium | Small-medium projects |
+| **Django** | Full-stack features | Slower | Large, feature-complete apps |
+
+**Benchmark Results:**
+- FastAPI leverages async to provide fastest response times
+- Django slower due to "heavy abstraction"
+- Flask requires additional packages for advanced features
+
+**Application to Vera Connect:**
+- FastAPI confirmed as ideal choice
+- Async-first design critical for AI/LLM integrations
+- API-heavy architecture benefits from low latency
+- Pydantic v2 provides TypeScript-like type safety
+
+---
+
+### Paper 7: LCSD Platform Challenges (PMC9643911)
+
+**Key Findings from 33.7K Stack Overflow Posts:**
+
+**Top Deployment Pain Points:**
+
+| Topic | % of Questions | Issue |
+|-------|----------------|-------|
+| Platform Infrastructure API | 3.2% | Cloud connectivity |
+| App Deployment | 1.9% | Incremental updates, CI/CD |
+| Hosting Config & SEO | 1.8% | SSL configuration |
+
+**Key Insights:**
+1. **SSL Configuration** most common hosting issue
+   - Solution: Use Cloudflare automatic SSL (eliminates problem)
+
+2. **CI/CD Support** major friction point
+   - Solution: Git-based deployment (Railway auto-deploys from Git)
+
+3. **Infrastructure API Integration** causes database connectivity issues
+   - Solution: Use Railway managed PostgreSQL (pre-configured)
+
+4. **Testing Gaps** identified in low-code platforms
+   - Need: Built-in testing frameworks for user-generated sites
+
+**Critical Quote**: "Platform Maintenance and Deployment-SDLC phases are the most challenging among practitioners"
+
+**Application to Vera Connect:**
+- Prioritize PaaS solutions with managed DevOps
+- Railway/Cloudflare Pages eliminate deployment complexity
+- Automatic SSL removes #1 hosting pain point
+- Git integration solves CI/CD challenges
+
+---
+
+## Infrastructure Recommendations Summary
+
+Based on all three papers, the recommended stack is:
+
+| Component | Choice | Paper Justification |
+|-----------|--------|---------------------|
+| Region | EU (Frankfurt) | Paper 5: GDPR compliance |
+| Backend | FastAPI | Paper 6: Best performance |
+| Hosting | Railway | Paper 7: Managed DevOps |
+| SSL | Cloudflare | Paper 7: Eliminates top pain point |
+| Audit Logs | Required | Paper 5: GDPR Article 33 |
+
+---
+
+## Domain Registrar Comparison
+
+| Provider | Pricing Model | .com Price | API Quality | SSL Automation |
+|----------|---------------|------------|-------------|----------------|
+| **Cloudflare** | At-cost | $8.57/yr | ⭐⭐⭐⭐⭐ Modern REST | Included (free) |
+| **Namecheap** | Retail + discounts | ~$8.88/yr | ⭐⭐⭐⭐ Mature | Via purchase |
+| **GoDaddy** | Wholesale (50+ min) | ~$9.99+/yr | ⭐⭐⭐ Complex | Via purchase |
+| **Route53** | TLD-specific | ~$12/yr | ⭐⭐⭐⭐ AWS SDK | ACM free |
+
+**Recommendation**: Cloudflare Registrar API (at-cost, best integration)
+
+---
+
+## Hosting Platform Comparison
+
+### Static Sites (User-Generated)
+
+| Platform | Free Tier | Custom Domains | SSL | Multi-tenant Limit |
+|----------|-----------|----------------|-----|-------------------|
+| **Cloudflare Pages** | Unlimited | Unlimited | Free auto | Unlimited |
+| **Vercel** | Non-commercial | Unlimited | Free auto | 100K (Pro) |
+| **Netlify** | 100GB BW | Unlimited | Free auto | N/A |
+| **S3+CloudFront** | Pay-as-go | Via Route53 | ACM free | Unlimited |
+
+**Recommendation**: Cloudflare Pages (free, unlimited, EU regions)
+
+### Python Backend
+
+| Platform | Pricing | EU Region | Python Support | DB Included |
+|----------|---------|-----------|----------------|-------------|
+| **Railway** | $5 credit + usage | Frankfurt ✅ | Native | PostgreSQL |
+| **Render** | From $7/mo | Frankfurt ✅ | Native | PostgreSQL |
+| **Fly.io** | From $5/mo | Amsterdam ✅ | Docker | PostgreSQL |
+
+**Recommendation**: Railway (Frankfurt) - best DX for Python, EU compliant
+
+---
+
+## Cost Projections
+
+| Scale | Monthly Cost | Breakdown |
+|-------|--------------|-----------|
+| 100 users | ~$35 | Free static + $25 Railway + $10 DB |
+| 1,000 users | ~$125 | $20 Pages Pro + $75 Railway + $30 DB |
+| 10,000 users | ~$440 | $40 Cloudflare + $300 compute + $100 DB |
+
+---
+
+## Sources
+
+- [Cloudflare Registrar API](https://developers.cloudflare.com/registrar/registrar-api/)
+- [Vercel Multi-tenant Docs](https://vercel.com/docs/multi-tenant/domain-management)
+- [Railway Documentation](https://docs.railway.com/)
+- [GDPR Cloud Architecture Paper](https://pmc.ncbi.nlm.nih.gov/articles/PMC11041943/)
+- [Python Frameworks Comparison](https://ijsrem.com/)
+- [LCSD Challenges Analysis](https://pmc.ncbi.nlm.nih.gov/articles/PMC9643911/)
