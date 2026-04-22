@@ -103,3 +103,49 @@
   - **Cookie Consent**: Runtime script blocking before explicit consent (critical 2026 requirement)
   - **Member Auth**: JWT-based with site membership verification
   - Full cost projections: ~$50/mo at startup, ~$320/mo at 10K generations
+
+---
+
+## Feature Analyst (Run ID: baf998ff)
+
+### Checklist
+
+- [x] Visit and analyze https://www.congressus.nl for droppable UI elements
+- [x] Visit and analyze https://www.genkgo.nl/en for droppable UI elements
+- [x] Visit and analyze https://verenigingenweb.nl/nl for droppable UI elements
+- [x] Visit and analyze https://www.cedonulli.nl for droppable UI elements
+- [x] Visit and analyze https://www.antibarbari.nl for droppable UI elements
+- [x] Visit and analyze https://www.dizkartes.nl/home for droppable UI elements
+- [x] Compile comprehensive list of all observed element types across competitors
+- [x] Categorize elements by type (content, media, forms, navigation, etc.)
+- [x] Note which elements appear most frequently across competitors
+
+### Agent Updates
+
+- 2026-04-22: Completed docs/research/competitor-features.md with:
+  - **Feature Matrix**: 31 elements tracked across 6 competitors + industry standards
+  - **4-Tier Prioritization**: Elements sorted by feasibility (Essential → Advanced)
+  - **Market Gaps Identified**: 7 opportunities (AI content, mobile-first editing, collaboration, templates)
+  - **Template Categories**: 5 verticals (Student, Sports, Housing, Cultural, Alumni)
+  - **MVP Roadmap**: 4-phase implementation plan with 28 total elements
+
+## Tech Researcher (Run ID: baf998ff)
+
+### Checklist
+
+- [x] Research common drag-and-drop builder element categories and implementation complexity
+- [x] Assess feasibility tiers: simple (text, images), moderate (forms, galleries), complex (dynamic content, integrations)
+- [x] Document technical considerations for each element type (rendering, data storage, responsiveness)
+- [x] Identify any elements that require third-party integrations or special handling
+- [x] Provide feasibility scoring criteria for the Synthesizer
+
+### Agent Updates
+
+- 2026-04-22: Completed docs/research/technical-feasibility.md with:
+  - **Feasibility Scoring System**: 1-5 complexity scale with dev time estimates and dependencies
+  - **7 Element Tiers**: Static Content → E-Commerce (31 elements with technical assessments)
+  - **Framework Recommendation**: Craft.js for React-native builder, GrapesJS as alternative
+  - **Third-Party Integrations**: Payment providers (Mollie for NL market), embed strategies, auth options
+  - **Security Considerations**: XSS prevention, CAPTCHA, PCI compliance strategies
+  - **Performance Benchmarks**: Core Web Vitals targets and optimization strategies
+  - **Implementation Priority Matrix**: Value vs. complexity visualization for roadmap planning
