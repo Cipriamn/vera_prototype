@@ -557,3 +557,160 @@ Based on all three papers, the recommended stack is:
 - [GDPR Cloud Architecture Paper](https://pmc.ncbi.nlm.nih.gov/articles/PMC11041943/)
 - [Python Frameworks Comparison](https://ijsrem.com/)
 - [LCSD Challenges Analysis](https://pmc.ncbi.nlm.nih.gov/articles/PMC9643911/)
+
+---
+
+# AI & Privacy Researcher Findings
+
+**Added: 2026-04-22**
+
+## Paper Analysis (Papers 8-10)
+
+### Paper 8: GDPR Design Principles (Formal Concept Analysis)
+
+**Key Findings:**
+- Privacy properties framework: confidentiality, unlinkability, intervenability, integrity, availability, transparency
+- Article 25 GDPR mandates technical + organizational measures from design stage
+- 97% of EU apps still deploy dark patterns (2025 data) despite enforcement
+- €950K fine in 2025 specifically for Article 25 violations (missing privacy measures from system outset)
+
+**Application to Vera Connect:**
+- Implement privacy controls at architecture level, not as afterthought
+- Form data must have: encryption at rest, defined retention periods, consent verification before storage
+- Cookie banners need: equal prominence for accept/reject, no pre-checked boxes
+
+### Paper 9: UICoder - LLM UI Code Generation
+
+**Key Findings:**
+- Iterative self-improvement approach using automated feedback (no human annotation needed)
+- Compilation rate improved: 0.03 → 0.79 with 5 training iterations
+- CLIP score (visual-semantic alignment): 0.334 → 0.404
+- Elo rating approached proprietary models (1099 vs 1200+)
+
+**Application to Vera Connect:**
+- Consider fine-tuning smaller models on Vera-specific templates for cost reduction
+- Use compilation/rendering validation as automated quality check
+- Multi-step generation (outline → sections → content) matches their iterative approach
+
+### Paper 10: Sketch2Code VLM Benchmark
+
+**Key Findings:**
+- **Top performers**: Claude 3.5 Sonnet and GPT-4o (~21-22% layout similarity)
+- Open-source models significantly underperform (<7%)
+- Text-augmented prompting boosts performance 5-7%
+- Multi-turn feedback improves visual similarity by 7.1% over 5 rounds
+- **Critical gap**: Models struggle with clarifying questions despite user preference
+
+**Application to Vera Connect:**
+- Use commercial models (Claude/GPT-4o) for production
+- Implement iterative feedback loops rather than single-shot generation
+- Provide text descriptions alongside any visual inputs
+
+---
+
+## AI Page Generation Recommendations
+
+### Model Selection & Costs (2026 Pricing)
+
+| Model | Input $/1M | Output $/1M | Cost/Page | Best For |
+|-------|------------|-------------|-----------|----------|
+| GPT-4o Mini | $0.15 | $0.60 | ~$0.002 | High volume templates |
+| GPT-5 mini | $0.25 | $2.00 | ~$0.007 | Quality/cost balance |
+| Claude Sonnet 4.6 | $3.00 | $15.00 | ~$0.05 | Complex layouts |
+| Claude Opus 4.6 | $5.00 | $25.00 | ~$0.08 | Maximum quality |
+
+**Recommendation**: GPT-4o Mini for templates, Claude Sonnet for complex/custom
+
+### Structured Output Approach
+
+| Provider | Method | Schema Compliance | Token Overhead |
+|----------|--------|-------------------|----------------|
+| OpenAI | Native JSON mode | 99.9%+ | 80-120 tokens |
+| Claude | Tool use pattern | 99.8% | 150-300 tokens |
+
+**Key Practice**: Keep schemas flat (≤2 nesting levels) for reliable output
+
+### Cost Optimization Strategies
+
+1. **Caching**: Redis with 1-hour TTL → expect 70%+ hit rate
+2. **Prompt caching**: 90% savings on cached reads
+3. **Batch API**: 50% discount for non-real-time
+4. **Tiered models**: Use cheaper models for simple requests
+
+### Multi-Step Generation Pipeline
+
+```
+1. Template Selection (Haiku/Mini) - $0.001
+   → Identify page type, structure
+
+2. Section Generation (Sonnet/4o) - $0.02
+   → Component JSON per section
+
+3. Content Enhancement (Optional) - $0.01
+   → Copy refinement, SEO
+```
+
+---
+
+## GDPR Compliance Recommendations
+
+### Data Architecture
+
+| Layer | Implementation | Key |
+|-------|---------------|-----|
+| Hosting | Azure West Europe | Rotterdam proximity |
+| DB Encryption | AES-256 TDE | Azure Key Vault |
+| Field Encryption | Fernet (cryptography) | Per-tenant keys |
+| Transit | TLS 1.3 | Let's Encrypt |
+
+### Python Libraries
+
+| Purpose | Library | Notes |
+|---------|---------|-------|
+| Encryption | `cryptography` | FIPS-compliant, Fernet for PII |
+| Passwords | `bcrypt` | Industry standard |
+| Consent (Django) | `django-GDPR` | Consent storage, anonymization |
+| Cookies (Django) | `django-cookie-consent` | Opt-in/opt-out management |
+| Cookies (FastAPI) | Custom + [Klaro](https://github.com/klaro-org/klaro-js) | Open-source consent manager |
+
+### Form Handling Flow
+
+1. **Consent verification** before storage
+2. **Encrypt PII fields** with per-tenant keys
+3. **Store in EU-hosted PostgreSQL**
+4. **Schedule automated deletion** per retention policy
+5. **Audit log** all access
+
+### Cookie Banner Requirements (2025 Enforcement)
+
+- ❌ No pre-checked boxes
+- ✅ Equal prominence for Accept/Reject
+- ❌ No dark patterns (hidden reject)
+- ✅ Granular per-category consent
+- ✅ One-click revoke accessible
+
+### Member-Only Pages
+
+| Approach | Complexity | Security | Recommendation |
+|----------|------------|----------|----------------|
+| Magic Links | Low | High | ✅ MVP |
+| OAuth (Google) | Medium | High | Phase 2 |
+| Vera Connect SSO | High | High | Production |
+
+---
+
+## Full Report
+
+Complete analysis with code examples: `docs/research/RESEARCH_AI_PRIVACY.md`
+
+---
+
+## Sources
+
+- [UICoder - arXiv](https://arxiv.org/html/2406.07739v1)
+- [Sketch2Code - arXiv](https://arxiv.org/html/2410.16232v1)
+- [LLM API Pricing 2026](https://www.tldl.io/resources/llm-api-pricing-2026)
+- [Claude vs OpenAI Structured Outputs](https://theneuralbase.com/structured-outputs/qna/claude-vs-openai-structured-outputs-comparison/)
+- [GDPR-Compliant Hosting 2025](https://dev.to/dev_tips/gdpr-compliant-hosting-best-practices-for-developers-in-2025-jl5)
+- [django-GDPR](https://pypi.org/project/django-GDPR/)
+- [Privacy by Design - ICO](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/guide-to-accountability-and-governance/data-protection-by-design-and-by-default/)
